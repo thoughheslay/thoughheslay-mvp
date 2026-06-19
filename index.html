@@ -1,92 +1,329 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THOUGH HE SLAY ME | Blueprint MVP</title>
-    <!-- 引入 Tailwind CSS 用于快速样式渲染 -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>THOUGH HE SLAY ME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap');
-        .font-serif-theology { font-family: 'Cinzel', serif; }
-        .font-sans-clean { font-family: 'Inter', sans-serif; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --black:   #0b0a0a;
+            --surface: #111010;
+            --border:  #1e1c19;
+            --ash:     #8B7355;
+            --ash-dim: #5a4a33;
+            --text:    #e2ddd6;
+            --muted:   #7a7065;
+            --faint:   #3a342c;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--black);
+            color: var(--text);
+            font-family: 'IM Fell English', Georgia, serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(11,10,10,0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Signature element: line interrupted by brand name */
+        .brand-line {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            width: 100%;
+        }
+
+        .brand-line::before,
+        .brand-line::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--faint);
+        }
+
+        .brand-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            color: #fff;
+            text-decoration: none;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 7rem 2rem 5rem;
+            text-align: center;
+        }
+
+        .verse-connector {
+            font-family: 'IM Fell English', Georgia, serif;
+            font-size: 0.75rem;
+            font-style: italic;
+            color: var(--faint);
+            letter-spacing: 0.08em;
+            margin-bottom: 1.8rem;
+        }
+
+        .eyebrow {
+            font-family: 'Cinzel', serif;
+            font-size: 0.62rem;
+            letter-spacing: 0.45em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .survived {
+            font-family: 'IM Fell English', Georgia, serif;
+            font-size: 0.95rem;
+            font-style: italic;
+            color: var(--ash);
+            letter-spacing: 0.05em;
+            margin-top: 1rem;
+        }
+
+        .hero-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 5.5vw, 3.6rem);
+            letter-spacing: 0.22em;
+            color: #fff;
+            text-transform: uppercase;
+            line-height: 1.1;
+            white-space: nowrap;
+            margin-bottom: 2rem;
+        }
+
+        /* Ash accent under title */
+        .ash-rule {
+            width: 2.5rem;
+            height: 1px;
+            background: var(--ash);
+            margin: 0 auto 2.5rem;
+        }
+
+        .hero-lead {
+            font-size: 0.72rem;
+            letter-spacing: 0.3em;
+            color: var(--ash-dim);
+            text-transform: uppercase;
+            font-family: 'Cinzel', serif;
+            margin-bottom: 1.4rem;
+        }
+
+        .hero-body {
+            font-size: 1rem;
+            line-height: 1.85;
+            color: var(--muted);
+            font-style: italic;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* ── PRODUCTS ── */
+        .products-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 8rem;
+        }
+
+        .section-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.5em;
+            color: var(--muted);
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid { grid-template-columns: 1fr; }
+        }
+
+        .product-card {
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .product-image {
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: #161411;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.88;
+            display: block;
+        }
+
+        .product-info {
+            padding: 1.4rem 1.4rem 1.2rem;
+        }
+
+        .product-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.18em;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .product-spec {
+            font-family: 'Cinzel', serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.25em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .product-status {
+            font-family: 'Cinzel', serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.25em;
+            color: var(--ash-dim);
+            text-transform: uppercase;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-brand {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.45em;
+            color: var(--faint);
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-copy {
+            font-family: 'Cinzel', serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.3em;
+            color: var(--faint);
+            text-transform: uppercase;
+        }
+
+        /* ── REDUCED MOTION ── */
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+        }
     </style>
 </head>
-<body class="bg-[#0b0a0a] text-[#e6e4e0] font-sans-clean antialiased selection:bg-[#2a251d] selection:text-[#fff]">
+<body>
 
-    <!-- 顶部导航栏 / 极简品牌标识 -->
-    <header class="border-b border-[#1f1c18] bg-[#0b0a0a]/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="#" class="font-serif-theology tracking-[0.3em] text-sm uppercase text-[#fff] hover:opacity-80 transition-opacity">
-                THOUGH HE SLAY ME
-            </a>
-            <div class="flex items-center gap-6 text-xs tracking-widest text-[#a1998d] uppercase">
-                <span class="inline-flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    MVP LAUNCH v1.0
-                </span>
+    <header>
+        <div class="header-inner">
+            <div class="brand-line">
+                <a href="#" class="brand-name">Though He Slay Me</a>
             </div>
         </div>
     </header>
 
-    <!-- 核心视觉区 / 宣言 -->
-    <main class="py-16 md:py-24">
-        <div class="max-w-3xl mx-auto text-center px-6 mb-16 md:mb-24">
-            <p class="text-xs tracking-[0.4em] text-[#6e665a] uppercase mb-4">Theology & Heavyweight Apparel</p>
-            <h1 class="font-serif-theology text-3xl md:text-5xl tracking-[0.15em] text-[#fff] leading-tight uppercase mb-6">
-                ARCHETYPAL BLUEPRINT
-            </h1>
-            <div class="w-12 h-[1px] bg-[#4a4031] mx-auto mb-6"></div>
-            <p class="text-sm md:text-base text-[#a1998d] leading-relaxed font-light max-w-xl mx-auto">
-                “Though he slay me, yet will I trust in him.” 坐在炉灰之中的沉思，化为克重与面料的挺括。纯粹、克制、不妥协。
+    <main>
+        <section class="hero">
+            <p class="eyebrow">From the Ash</p>
+            <h1 class="hero-title">Yet Will I Trust</h1>
+            <div class="ash-rule"></div>
+            <p class="hero-lead">Some words are earned, not chosen.</p>
+            <p class="hero-body">
+                Built on language that costs something — phrases forged in loss, silence, and the kind of faith that has been tested to its limit and still holds.
             </p>
-        </div>
 
-        <!-- 核心单品展示区域 (Grid 网格布局) -->
-        <section class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
-                
-                <!-- 第一件：黑色 THOUGH HE SLAY ME -->
-                <div class="group border border-[#1f1c18] bg-[#12110f] p-4 transition-all duration-300 hover:border-[#3d3427]">
-                    <div class="aspect-[16/9] md:aspect-square w-full overflow-hidden bg-[#1c1a17] border border-[#1f1c18] mb-6">
-                        <!-- 对应你的 black.png 图片 -->
-                        <img src="black.png" alt="Though He Slay Me Hoodie - Black" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-300">
+        </section>
+
+        <section class="products-section">
+            <p class="section-label">400GSM Heavyweight — Concept Collection</p>
+            <div class="products-grid">
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="black.png" alt="Though He Slay Me — Onyx Black">
                     </div>
-                    <div class="px-2 pb-2">
-                        <h3 class="font-serif-theology text-base tracking-[0.2em] text-[#fff] uppercase mb-1">"THOUGH HE SLAY ME"</h3>
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-[#1f1c18]">
-                            <span class="text-xs text-[#6e665a] tracking-wider uppercase font-light">Onyx Black / 400GSM</span>
-                            <span class="text-xs text-[#a1998d] font-mono">CONCEPT</span>
+                    <div class="product-info">
+                        <h3 class="product-name">"Though He Slay Me"</h3>
+                        <div class="product-meta">
+                            <span class="product-spec">Onyx Black / 400GSM</span>
+                            <span class="product-status">Concept</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 第二件：深灰色 DEATH WHERE IS THY STING -->
-                <div class="group border border-[#1f1c18] bg-[#12110f] p-4 transition-all duration-300 hover:border-[#3d3427]">
-                    <div class="aspect-[16/9] md:aspect-square w-full overflow-hidden bg-[#1c1a17] border border-[#1f1c18] mb-6">
-                        <!-- 对应你的 charcoal.png 图片 -->
-                        <img src="charcoal.png" alt="Death Where Is Thy Sting Hoodie - Charcoal" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="charcoal.png" alt="Death Where Is Thy Sting — Charcoal">
                     </div>
-                    <div class="px-2 pb-2">
-                        <h3 class="font-serif-theology text-base tracking-[0.2em] text-[#fff] uppercase mb-1">"DEATH WHERE IS THY STING"</h3>
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-[#1f1c18]">
-                            <span class="text-xs text-[#6e665a] tracking-wider uppercase font-light">Charcoal Gray / 400GSM</span>
-                            <span class="text-xs text-[#a1998d] font-mono">CONCEPT</span>
+                    <div class="product-info">
+                        <h3 class="product-name">"Death Where Is Thy Sting"</h3>
+                        <div class="product-meta">
+                            <span class="product-spec">Charcoal Gray / 400GSM</span>
+                            <span class="product-status">Concept</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 第三件：浅灰色 YET NOT I -->
-                <div class="group border border-[#1f1c18] bg-[#12110f] p-4 transition-all duration-300 hover:border-[#3d3427]">
-                    <div class="aspect-[16/9] md:aspect-square w-full overflow-hidden bg-[#1c1a17] border border-[#1f1c18] mb-6">
-                        <!-- 对应你的 light-gray.png 图片 -->
-                        <img src="light-gray.png" alt="Yet Not I Hoodie - Light Gray" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="light-gray.png" alt="Yet Not I — Ash Gray">
                     </div>
-                    <div class="px-2 pb-2">
-                        <h3 class="font-serif-theology text-base tracking-[0.2em] text-[#fff] uppercase mb-1">"YET NOT I"</h3>
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-[#1f1c18]">
-                            <span class="text-xs text-[#6e665a] tracking-wider uppercase font-light">Ash Gray / 400GSM</span>
-                            <span class="text-xs text-[#a1998d] font-mono">CONCEPT</span>
+                    <div class="product-info">
+                        <h3 class="product-name">"Yet Not I"</h3>
+                        <div class="product-meta">
+                            <span class="product-spec">Ash Gray / 400GSM</span>
+                            <span class="product-status">Concept</span>
                         </div>
                     </div>
                 </div>
@@ -95,9 +332,10 @@
         </section>
     </main>
 
-    <!-- 页脚 -->
-    <footer class="border-t border-[#1f1c18] bg-[#0b0a0a] py-12 mt-12 text-center text-xs text-[#524b41] tracking-widest uppercase">
-        <p>© 2026 THOUGH HE SLAY ME. ALL RIGHTS RESERVED.</p>
+    <footer>
+        <p class="survived">Wear what you've survived.</p>
+        <p class="footer-brand" style="margin-top:1.5rem;">Though He Slay Me</p>
+        <p class="footer-copy">© 2026 — All Rights Reserved</p>
     </footer>
 
 </body>
