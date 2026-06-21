@@ -10,14 +10,20 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --black:   #0b0a0a;
-            --surface: #111010;
-            --border:  #1e1c19;
-            --ash:     #8B7355;
-            --ash-dim: #5a4a33;
-            --text:    #e2ddd6;
-            --muted:   #7a7065;
-            --faint:   #3a342c;
+            --black:      #14110d;       /* warm deep charcoal, replaces pure black */
+            --surface:    #1a1611;
+            --card:       #1d1813;
+            --border:     #2b261f;
+            --ash:        #b39873;
+            --ash-soft:   #8B7355;
+            --ash-dim:    #6a5b44;
+            --text:       #ece8e1;
+            --muted:      #9a8f80;
+            --faint:      #5a5247;
+            --col-black:  #1a1814;
+            --col-oatmeal:#e8dcc8;
+            --col-red:    #8B2020;
+            --subpage:    #1a1610;       /* slightly lifted bg for subpages */
         }
 
         html { scroll-behavior: smooth; }
@@ -34,28 +40,27 @@
         header {
             position: sticky;
             top: 0;
-            z-index: 50;
-            background: rgba(11,10,10,0.92);
-            backdrop-filter: blur(10px);
+            z-index: 100;
+            background: rgba(20,17,13,0.96);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
         }
 
         .header-inner {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 2.5rem;
             height: 64px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            position: relative;
         }
 
-        /* Signature element: line interrupted by brand name */
         .brand-line {
             display: flex;
             align-items: center;
-            gap: 1.2rem;
-            width: 100%;
+            gap: 1.4rem;
+            flex: 1;
         }
 
         .brand-line::before,
@@ -68,275 +73,897 @@
 
         .brand-name {
             font-family: 'Cinzel', serif;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             letter-spacing: 0.4em;
-            color: #fff;
-            text-decoration: none;
+            color: var(--text);
             white-space: nowrap;
             text-transform: uppercase;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
         }
 
-        /* ── HERO ── */
+        /* ── VIEWS / TRANSITION ── */
+        .view {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.45s ease;
+        }
+        .view.active { display: block; opacity: 1; }
+        .view.fade-out { opacity: 0; }
+
+        /* Subpages get a subtly lifted warm background */
+        #view-product, #view-contact {
+            background: var(--subpage);
+            min-height: 100vh;
+        }
+
+        /* ══════════════════════════════
+           HOME — HERO
+        ══════════════════════════════ */
         .hero {
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 7rem 2rem 5rem;
+            min-height: calc(100vh - 64px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            padding: 3rem 2rem;
         }
 
-        .verse-connector {
-            font-family: 'IM Fell English', Georgia, serif;
-            font-size: 0.75rem;
-            font-style: italic;
-            color: var(--faint);
-            letter-spacing: 0.08em;
-            margin-bottom: 1.8rem;
+        .hero-inner {
+            max-width: 560px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .eyebrow {
+        .hero-eyebrow {
             font-family: 'Cinzel', serif;
-            font-size: 0.62rem;
+            font-size: 0.82rem;
             letter-spacing: 0.45em;
-            color: var(--muted);
-            text-transform: uppercase;
-            margin-bottom: 2rem;
-        }
-
-        .survived {
-            font-family: 'IM Fell English', Georgia, serif;
-            font-size: 0.95rem;
-            font-style: italic;
             color: var(--ash);
-            letter-spacing: 0.05em;
-            margin-top: 1rem;
+            text-transform: uppercase;
+            margin-bottom: 2.2rem;
+            /* compensate letter-spacing to keep optically centered */
+            text-indent: 0.45em;
         }
 
         .hero-title {
             font-family: 'Cinzel', serif;
-            font-size: clamp(1.8rem, 5.5vw, 3.6rem);
-            letter-spacing: 0.22em;
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 600;
+            letter-spacing: 0.2em;
             color: #fff;
             text-transform: uppercase;
-            line-height: 1.1;
             white-space: nowrap;
-            margin-bottom: 2rem;
+            line-height: 1.1;
+            margin-bottom: 2.2rem;
+            text-indent: 0.2em;
         }
 
-        /* Ash accent under title */
         .ash-rule {
             width: 2.5rem;
             height: 1px;
             background: var(--ash);
-            margin: 0 auto 2.5rem;
+            margin-bottom: 2.4rem;
         }
 
-        .hero-lead {
-            font-size: 0.72rem;
-            letter-spacing: 0.3em;
-            color: var(--ash-dim);
-            text-transform: uppercase;
-            font-family: 'Cinzel', serif;
-            margin-bottom: 1.4rem;
-        }
-
-        .hero-body {
-            font-size: 1rem;
-            line-height: 1.85;
-            color: var(--muted);
+        .hero-narrative {
+            font-size: 1.2rem;
+            line-height: 2;
+            color: var(--text);
             font-style: italic;
-            max-width: 520px;
-            margin: 0 auto;
+            margin-bottom: 2.4rem;
         }
 
-        /* ── PRODUCTS ── */
-        .products-section {
-            max-width: 1200px;
+        .hero-cta {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.28em;
+            color: var(--ash);
+            text-transform: uppercase;
+            line-height: 1.9;
+            text-indent: 0.28em;
+        }
+
+        /* ══════════════════════════════
+           HOME — COLLECTION
+        ══════════════════════════════ */
+        .collection {
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 0 2rem 8rem;
+            padding: 4rem 2.5rem 2rem;
         }
 
         .section-label {
             font-family: 'Cinzel', serif;
-            font-size: 0.58rem;
-            letter-spacing: 0.5em;
+            font-size: 0.8rem;
+            letter-spacing: 0.42em;
             color: var(--muted);
             text-transform: uppercase;
-            text-align: center;
-            margin-bottom: 4rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border);
+            text-indent: 0.42em;
         }
 
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        .phrase-list { list-style: none; }
+
+        .phrase-item {
+            position: relative;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .phrase-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            width: 2px;
+            height: 0;
+            background: var(--ash);
+            transition: height 0.45s ease;
+        }
+        .phrase-item:hover::before { height: 100%; }
+
+        .phrase-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2.2rem 1.5rem 2.2rem 2.5rem;
+            transition: padding-left 0.45s ease;
             gap: 1.5rem;
         }
+        .phrase-item:hover .phrase-row { padding-left: 3.2rem; }
 
-        @media (max-width: 768px) {
-            .products-grid { grid-template-columns: 1fr; }
+        .phrase-left { display: flex; flex-direction: column; min-width: 0; }
+
+        .phrase-word {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            letter-spacing: 0.12em;
+            color: var(--text);
+            text-transform: uppercase;
+            line-height: 1.25;
+            transition: color 0.3s, letter-spacing 0.3s, font-style 0.3s;
+        }
+        .phrase-item:hover .phrase-word {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            color: #fff;
+            letter-spacing: 0.04em;
         }
 
-        .product-card {
-            border: 1px solid var(--border);
-            background: var(--surface);
-        }
-
-        .product-image {
-            aspect-ratio: 1 / 1;
+        .phrase-note {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: var(--ash);
+            max-height: 0;
             overflow: hidden;
-            background: #161411;
+            opacity: 0;
+            transition: max-height 0.45s ease, opacity 0.4s ease, margin-top 0.45s ease;
+            line-height: 1.5;
+        }
+        .phrase-item:hover .phrase-note {
+            max-height: 100px;
+            opacity: 1;
+            margin-top: 0.7rem;
+        }
+
+        .phrase-right {
+            display: flex;
+            align-items: center;
+            gap: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .phrase-ref {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--ash);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            white-space: nowrap;
+        }
+        .phrase-item:hover .phrase-ref { opacity: 1; }
+
+        .phrase-arrow {
+            width: 26px;
+            height: 1px;
+            background: var(--faint);
+            position: relative;
+            transition: width 0.3s, background 0.3s;
+            flex-shrink: 0;
+        }
+        .phrase-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0; top: -3px;
+            width: 7px; height: 7px;
+            border-right: 1px solid var(--faint);
+            border-top: 1px solid var(--faint);
+            transform: rotate(45deg);
+            transition: border-color 0.3s;
+        }
+        .phrase-item:hover .phrase-arrow { width: 38px; background: var(--ash); }
+        .phrase-item:hover .phrase-arrow::after { border-color: var(--ash); }
+
+        /* Survived */
+        .survived-bar {
+            border-top: 1px solid var(--border);
+            padding: 3.5rem 2.5rem;
+            text-align: center;
+        }
+        .survived-text {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: var(--ash);
+            letter-spacing: 0.03em;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.8rem 2.5rem;
+            text-align: center;
+        }
+        .footer-contact-link {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.32em;
+            color: var(--muted);
+            text-transform: uppercase;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 1.8rem;
+            transition: color 0.3s;
+            text-indent: 0.32em;
+        }
+        .footer-contact-link:hover { color: var(--text); }
+        .footer-brand {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.45em;
+            color: var(--faint);
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+            text-indent: 0.45em;
+        }
+        .footer-copy {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.28em;
+            color: var(--faint);
+            text-transform: uppercase;
+            text-indent: 0.28em;
+        }
+
+        /* ══════════════════════════════
+           PRODUCT VIEW
+        ══════════════════════════════ */
+        .product-header {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4.5rem 2.5rem 2.5rem;
             border-bottom: 1px solid var(--border);
         }
-
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.88;
-            display: block;
-        }
-
-        .product-info {
-            padding: 1.4rem 1.4rem 1.2rem;
-        }
-
-        .product-name {
+        .back-btn {
             font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.32em;
+            color: var(--muted);
+            text-transform: uppercase;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 2.8rem;
+            transition: color 0.3s;
+        }
+        .back-btn::before {
+            content: '';
+            width: 22px;
+            height: 1px;
+            background: currentColor;
+            transition: width 0.3s;
+        }
+        .back-btn:hover { color: var(--text); }
+        .back-btn:hover::before { width: 30px; }
+
+        .product-headline {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
             letter-spacing: 0.18em;
             color: #fff;
             text-transform: uppercase;
+            line-height: 1.1;
             margin-bottom: 1rem;
-            line-height: 1.5;
+        }
+        .product-subline {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--ash);
+            line-height: 1.6;
         }
 
-        .product-meta {
+        .type-tabs {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 2.5rem;
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .type-tab {
+            font-family: 'Cinzel', serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            padding: 1.6rem 2rem 1.6rem 0;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .type-tab.active { color: var(--text); border-bottom-color: var(--ash); }
+        .type-tab:hover:not(.active) { color: var(--text); }
+
+        .product-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3.5rem 2.5rem 6rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.8rem;
+        }
+        @media (max-width: 900px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .product-grid { grid-template-columns: 1fr; } }
+
+        .product-card {
+            border: 1px solid var(--border);
+            background: var(--card);
+            transition: border-color 0.3s;
+        }
+        .product-card:hover { border-color: var(--ash-dim); }
+
+        .card-img-wrap {
+            aspect-ratio: 1 / 1;
+            background: #100d09;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .card-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+            display: block;
+            transition: opacity 0.3s ease;
+            position: absolute;
+            top: 0; left: 0;
+        }
+        .card-img.fade-out { opacity: 0; }
+        .card-placeholder {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            color: var(--faint);
+            text-transform: uppercase;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .card-body { padding: 1.4rem; }
+        .card-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.82rem;
+            letter-spacing: 0.1em;
+            color: var(--text);
+            text-transform: uppercase;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+            min-height: 2.6em;
+        }
+        .swatch-row { display: flex; gap: 0.6rem; margin-bottom: 1.2rem; }
+        .swatch {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s;
+            flex-shrink: 0;
+        }
+        .swatch:hover { transform: scale(1.15); }
+        .swatch.active { border: 2px solid var(--ash); transform: scale(1.1); }
+
+        .card-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-top: 1rem;
             border-top: 1px solid var(--border);
         }
-
-        .product-spec {
+        .card-spec {
             font-family: 'Cinzel', serif;
-            font-size: 0.55rem;
-            letter-spacing: 0.25em;
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
             color: var(--muted);
             text-transform: uppercase;
         }
-
-        .product-status {
+        .card-status {
             font-family: 'Cinzel', serif;
-            font-size: 0.55rem;
-            letter-spacing: 0.25em;
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
             color: var(--ash-dim);
             text-transform: uppercase;
         }
 
-        /* ── FOOTER ── */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 3rem 2rem;
-            text-align: center;
+        /* ══════════════════════════════
+           CONTACT VIEW
+        ══════════════════════════════ */
+        .contact-wrap {
+            max-width: 580px;
+            margin: 0 auto;
+            padding: 5rem 2.5rem 7rem;
         }
-
-        .footer-brand {
+        .contact-title {
             font-family: 'Cinzel', serif;
-            font-size: 0.6rem;
-            letter-spacing: 0.45em;
-            color: var(--faint);
+            font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+            letter-spacing: 0.18em;
+            color: #fff;
             text-transform: uppercase;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            margin-top: 2.8rem;
         }
-
-        .footer-copy {
+        .contact-sub {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--ash);
+            margin-bottom: 3.5rem;
+            line-height: 1.6;
+        }
+        .contact-form { display: flex; flex-direction: column; gap: 1.8rem; }
+        .form-field { display: flex; flex-direction: column; gap: 0.6rem; }
+        .form-label {
             font-family: 'Cinzel', serif;
-            font-size: 0.55rem;
-            letter-spacing: 0.3em;
-            color: var(--faint);
+            font-size: 0.68rem;
+            letter-spacing: 0.32em;
+            color: var(--muted);
             text-transform: uppercase;
         }
+        .form-input, .form-textarea {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'IM Fell English', serif;
+            font-size: 1.1rem;
+            padding: 0.7rem 0;
+            outline: none;
+            transition: border-color 0.3s;
+            width: 100%;
+            resize: none;
+        }
+        .form-input:focus, .form-textarea:focus { border-bottom-color: var(--ash); }
+        .form-textarea { min-height: 120px; line-height: 1.7; }
+        .form-submit {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            background: var(--ash);
+            color: var(--black);
+            border: none;
+            padding: 1.1rem 2.8rem;
+            cursor: pointer;
+            align-self: flex-start;
+            transition: background 0.3s;
+            margin-top: 0.6rem;
+            text-indent: 0.4em;
+        }
+        .form-submit:hover { background: var(--text); }
+        .form-success {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: var(--ash);
+            padding: 3rem 0;
+            display: none;
+        }
 
-        /* ── REDUCED MOTION ── */
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .hero-title { white-space: normal; letter-spacing: 0.12em; }
+            .phrase-row { padding: 1.8rem 0.5rem 1.8rem 1.5rem; }
+            .phrase-ref { display: none; }
+            .phrase-note { font-size: 1rem; }
+            .header-inner { padding: 0 1.5rem; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            * { transition: none !important; }
+            * { transition: none !important; animation: none !important; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-inner">
-            <div class="brand-line">
-                <a href="#" class="brand-name">Though He Slay Me</a>
-            </div>
+<header>
+    <div class="header-inner">
+        <div class="brand-line">
+            <button class="brand-name" onclick="showView('home')">Though He Slay Me</button>
         </div>
-    </header>
+    </div>
+</header>
 
-    <main>
-        <section class="hero">
-            <p class="eyebrow">From the Ash</p>
+<!-- ══════════ HOME ══════════ -->
+<div id="view-home" class="view active">
+
+    <section class="hero">
+        <div class="hero-inner">
+            <p class="hero-eyebrow">From the Ash</p>
             <h1 class="hero-title">Yet Will I Trust</h1>
             <div class="ash-rule"></div>
-            <p class="hero-lead">Some words are earned, not chosen.</p>
-            <p class="hero-body">
-                Built on language that costs something — phrases forged in loss, silence, and the kind of faith that has been tested to its limit and still holds.
+            <p class="hero-narrative">
+                Some words are earned, not invented — phrases forged in loss, silence, and the kind of faith that has been tested to its limit and still holds.
             </p>
+            <p class="hero-cta">These are six of them.<br>Enter at your own weight.</p>
+        </div>
+    </section>
 
-        </section>
+    <section class="collection">
+        <p class="section-label">The Collection</p>
+        <ul class="phrase-list">
 
-        <section class="products-section">
-            <p class="section-label">400GSM Heavyweight — Concept Collection</p>
-            <div class="products-grid">
-
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="black.png" alt="Though He Slay Me — Onyx Black">
+            <li class="phrase-item" onclick="showProduct('surrender')">
+                <div class="phrase-row">
+                    <div class="phrase-left">
+                        <span class="phrase-word">Surrender</span>
+                        <span class="phrase-note">Jacob's hip gave out before his will did.</span>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-name">"Though He Slay Me"</h3>
-                        <div class="product-meta">
-                            <span class="product-spec">Onyx Black / 400GSM</span>
-                            <span class="product-status">Concept</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="charcoal.png" alt="Death Where Is Thy Sting — Charcoal">
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name">"Death Where Is Thy Sting"</h3>
-                        <div class="product-meta">
-                            <span class="product-spec">Charcoal Gray / 400GSM</span>
-                            <span class="product-status">Concept</span>
-                        </div>
+                    <div class="phrase-right">
+                        <span class="phrase-ref">Matthew 11:29</span>
+                        <span class="phrase-arrow"></span>
                     </div>
                 </div>
+            </li>
 
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="light-gray.png" alt="Yet Not I — Ash Gray">
+            <li class="phrase-item" onclick="showProduct('meek')">
+                <div class="phrase-row">
+                    <div class="phrase-left">
+                        <span class="phrase-word">Meek</span>
+                        <span class="phrase-note">Strength that has chosen not to use itself.</span>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-name">"Yet Not I"</h3>
-                        <div class="product-meta">
-                            <span class="product-spec">Ash Gray / 400GSM</span>
-                            <span class="product-status">Concept</span>
-                        </div>
+                    <div class="phrase-right">
+                        <span class="phrase-ref">Matthew 11:29</span>
+                        <span class="phrase-arrow"></span>
                     </div>
                 </div>
+            </li>
 
-            </div>
-        </section>
-    </main>
+            <li class="phrase-item" onclick="showProduct('lowly')">
+                <div class="phrase-row">
+                    <div class="phrase-left">
+                        <span class="phrase-word">Lowly</span>
+                        <span class="phrase-note">He who holds all things called himself this. So can we.</span>
+                    </div>
+                    <div class="phrase-right">
+                        <span class="phrase-ref">Matthew 11:29</span>
+                        <span class="phrase-arrow"></span>
+                    </div>
+                </div>
+            </li>
+
+            <li class="phrase-item" onclick="showProduct('though')">
+                <div class="phrase-row">
+                    <div class="phrase-left">
+                        <span class="phrase-word">Though He Slay Me</span>
+                        <span class="phrase-note">Spoken from ash, not comfort.</span>
+                    </div>
+                    <div class="phrase-right">
+                        <span class="phrase-ref">Job 13:15</span>
+                        <span class="phrase-arrow"></span>
+                    </div>
+                </div>
+            </li>
+
+            <li class="phrase-item" onclick="showProduct('wept')">
+                <div class="phrase-row">
+                    <div class="phrase-left">
+                        <span class="phrase-word">He Wept</span>
+                        <span class="phrase-note">He is not unmoved. He never was.</span>
+                    </div>
+                    <div class="phrase-right">
+                        <span class="phrase-ref">John 11:35</span>
+                        <span class="phrase-arrow"></span>
+                    </div>
+                </div>
+            </li>
+
+            <li class="phrase-item" onclick="showProduct('death')">
+                <div class="phrase-row">
+                    <div class="phrase-left">
+                        <span class="phrase-word">Death, Where Is Thy Sting</span>
+                        <span class="phrase-note">Not a question. A declaration.</span>
+                    </div>
+                    <div class="phrase-right">
+                        <span class="phrase-ref">1 Corinthians 15:55</span>
+                        <span class="phrase-arrow"></span>
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+    </section>
+
+    <div class="survived-bar">
+        <p class="survived-text">Wear what you've survived.</p>
+    </div>
 
     <footer>
-        <p class="survived">Wear what you've survived.</p>
-        <p class="footer-brand" style="margin-top:1.5rem;">Though He Slay Me</p>
+        <button class="footer-contact-link" onclick="showView('contact')">Contact</button>
+        <p class="footer-brand">Though He Slay Me</p>
         <p class="footer-copy">© 2026 — All Rights Reserved</p>
     </footer>
+
+</div>
+
+<!-- ══════════ PRODUCT ══════════ -->
+<div id="view-product" class="view">
+    <div class="product-header">
+        <button class="back-btn" onclick="showView('home')">Collection</button>
+        <h2 class="product-headline" id="prod-title"></h2>
+        <p class="product-subline" id="prod-subline"></p>
+    </div>
+
+    <div class="type-tabs">
+        <button class="type-tab active" data-type="hoodie" onclick="setType(this)">Hoodie</button>
+        <button class="type-tab" data-type="tshirt" onclick="setType(this)">T-Shirt</button>
+        <button class="type-tab" data-type="cap" onclick="setType(this)">Cap</button>
+    </div>
+
+    <div class="product-grid" id="product-grid"></div>
+
+    <footer>
+        <button class="footer-contact-link" onclick="showView('contact')">Contact</button>
+        <p class="footer-brand">Though He Slay Me</p>
+        <p class="footer-copy">© 2026 — All Rights Reserved</p>
+    </footer>
+</div>
+
+<!-- ══════════ CONTACT ══════════ -->
+<div id="view-contact" class="view">
+    <div class="contact-wrap">
+        <button class="back-btn" onclick="showView('home')">Home</button>
+        <h2 class="contact-title">Get In Touch</h2>
+        <p class="contact-sub">For wholesale, press, or anything else worth saying.</p>
+
+        <form
+            class="contact-form"
+            id="contact-form"
+            action="https://formspree.io/f/YOUR_FORM_ID"
+            method="POST"
+            onsubmit="handleSubmit(event)"
+        >
+            <div class="form-field">
+                <label class="form-label" for="c-name">Name</label>
+                <input class="form-input" id="c-name" name="name" type="text" required autocomplete="off">
+            </div>
+            <div class="form-field">
+                <label class="form-label" for="c-email">Email</label>
+                <input class="form-input" id="c-email" name="email" type="email" required autocomplete="off">
+            </div>
+            <div class="form-field">
+                <label class="form-label" for="c-msg">Message</label>
+                <textarea class="form-textarea" id="c-msg" name="message" rows="5" required></textarea>
+            </div>
+            <button class="form-submit" type="submit">Send</button>
+        </form>
+
+        <p class="form-success" id="form-success">Received. We'll be in touch.</p>
+    </div>
+
+    <footer>
+        <p class="footer-brand">Though He Slay Me</p>
+        <p class="footer-copy">© 2026 — All Rights Reserved</p>
+    </footer>
+</div>
+
+<script>
+const COLORS = [
+    { id: 'black',   label: 'Black',   hex: '#1a1814' },
+    { id: 'oatmeal', label: 'Oatmeal', hex: '#e8dcc8' },
+    { id: 'red',     label: 'Red',     hex: '#8B2020'  },
+];
+
+const PHRASES = {
+    surrender: { title:'Surrender', subline:"Jacob's hip gave out before his will did.",
+        hoodie:{spec:'400GSM Heavyweight Hoodie',colors:['black','oatmeal','red']},
+        tshirt:{spec:'220GSM Oversized T-Shirt',colors:['black','oatmeal','red']},
+        cap:{spec:'Six-Panel Cap',colors:null} },
+    meek: { title:'Meek', subline:'Strength that has chosen not to use itself.',
+        hoodie:{spec:'400GSM Heavyweight Hoodie',colors:['black','oatmeal','red']},
+        tshirt:{spec:'220GSM Oversized T-Shirt',colors:['black','oatmeal','red']},
+        cap:{spec:'Six-Panel Cap',colors:null} },
+    lowly: { title:'Lowly', subline:'He who holds all things called himself this. So can we.',
+        hoodie:{spec:'400GSM Heavyweight Hoodie',colors:['black','oatmeal','red']},
+        tshirt:{spec:'220GSM Oversized T-Shirt',colors:['black','oatmeal','red']},
+        cap:{spec:'Six-Panel Cap',colors:null} },
+    though: { title:'Though He Slay Me', subline:'Spoken from ash, not comfort.',
+        hoodie:{spec:'400GSM Heavyweight Hoodie',colors:['black','oatmeal','red']},
+        tshirt:{spec:'220GSM Oversized T-Shirt',colors:['black','oatmeal','red']},
+        cap:{spec:'Six-Panel Cap',colors:null} },
+    wept: { title:'He Wept', subline:'He is not unmoved. He never was.',
+        hoodie:{spec:'400GSM Heavyweight Hoodie',colors:['black','oatmeal','red']},
+        tshirt:{spec:'220GSM Oversized T-Shirt',colors:['black','oatmeal','red']},
+        cap:{spec:'Six-Panel Cap',colors:null} },
+    death: { title:'Death, Where Is Thy Sting', subline:'Not a question. A declaration.',
+        hoodie:{spec:'400GSM Heavyweight Hoodie',colors:['black','oatmeal','red']},
+        tshirt:{spec:'220GSM Oversized T-Shirt',colors:['black','oatmeal','red']},
+        cap:{spec:'Six-Panel Cap',colors:null} },
+};
+
+let currentPhrase = null;
+let currentType   = 'hoodie';
+
+function showView(id) {
+    const current = document.querySelector('.view.active');
+    const next    = document.getElementById('view-' + id);
+    if (!next || current === next) return;
+
+    if (current) {
+        current.classList.add('fade-out');
+        setTimeout(() => {
+            current.classList.remove('active', 'fade-out');
+            next.classList.add('active', 'fade-out');
+            void next.offsetWidth;
+            next.classList.remove('fade-out');
+            window.scrollTo(0, 0);
+        }, 450);
+    } else {
+        next.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+}
+
+function showProduct(key) {
+    const p = PHRASES[key];
+    if (!p) return;
+    currentPhrase = key;
+    currentType   = 'hoodie';
+    document.getElementById('prod-title').textContent   = p.title;
+    document.getElementById('prod-subline').textContent = p.subline;
+    document.querySelectorAll('.type-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+    renderGrid();
+    showView('product');
+}
+
+function setType(el) {
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    currentType = el.dataset.type;
+    renderGrid();
+}
+
+function renderGrid() {
+    const grid   = document.getElementById('product-grid');
+    const p      = PHRASES[currentPhrase];
+    const config = p[currentType];
+    const isCap  = currentType === 'cap';
+    const typeLabel = { hoodie:'Hoodie', tshirt:'T-Shirt', cap:'Cap' }[currentType];
+
+    if (isCap) {
+        const imgSrc = `${currentPhrase}-cap.png`;
+        grid.innerHTML = buildCard({ key:currentPhrase, type:currentType, typeLabel,
+            spec:config.spec, colorId:null, colorLabel:null, imgSrc, isCap:true, colors:null });
+    } else {
+        const colorObjs = COLORS.filter(c => config.colors.includes(c.id));
+        grid.innerHTML = colorObjs.map(col => {
+            const imgSrc = `${currentPhrase}-${currentType}-${col.id}.png`;
+            return buildCard({ key:currentPhrase, type:currentType, typeLabel,
+                spec:config.spec, colorId:col.id, colorLabel:col.label, imgSrc, isCap:false, colors:colorObjs });
+        }).join('');
+    }
+}
+
+function buildCard({ key, type, typeLabel, spec, colorId, colorLabel, imgSrc, isCap, colors }) {
+    const cardId   = isCap ? `card-${key}-${type}` : `card-${key}-${type}-${colorId}`;
+    const nameText = isCap
+        ? `${PHRASES[key].title} — ${typeLabel}`
+        : `${PHRASES[key].title} — ${typeLabel} / ${colorLabel}`;
+
+    const swatchHTML = (!isCap && colors) ? `
+        <div class="swatch-row">
+            ${colors.map(c => `
+                <div class="swatch ${c.id === colorId ? 'active' : ''}"
+                     style="background:${c.hex}" title="${c.label}"
+                     onclick="switchColor('${key}','${type}','${c.id}','${cardId}')"></div>
+            `).join('')}
+        </div>` : '';
+
+    return `
+        <div class="product-card" id="${cardId}">
+            <div class="card-img-wrap">
+                <img class="card-img" src="${imgSrc}" alt="${nameText}"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <p class="card-placeholder" style="display:none">Image Coming Soon</p>
+            </div>
+            <div class="card-body">
+                <div class="card-name" id="${cardId}-name">${nameText}</div>
+                ${swatchHTML}
+                <div class="card-meta">
+                    <span class="card-spec">${spec}</span>
+                    <span class="card-status">Concept</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+function switchColor(key, type, newColorId, cardId) {
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    const colorObj  = COLORS.find(c => c.id === newColorId);
+    const typeLabel = { hoodie:'Hoodie', tshirt:'T-Shirt', cap:'Cap' }[type];
+    const newName   = `${PHRASES[key].title} — ${typeLabel} / ${colorObj.label}`;
+    const newImg    = `${key}-${type}-${newColorId}.png`;
+
+    const nameEl = document.getElementById(cardId + '-name');
+    if (nameEl) nameEl.textContent = newName;
+
+    const imgEl = card.querySelector('.card-img');
+    if (imgEl) {
+        imgEl.classList.add('fade-out');
+        setTimeout(() => {
+            imgEl.src = newImg;
+            imgEl.style.display = 'block';
+            const placeholder = card.querySelector('.card-placeholder');
+            if (placeholder) placeholder.style.display = 'none';
+            imgEl.onerror = function() {
+                this.style.display = 'none';
+                if (placeholder) placeholder.style.display = 'block';
+            };
+            imgEl.classList.remove('fade-out');
+        }, 280);
+    }
+
+    card.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+    const activeSwatch = [...card.querySelectorAll('.swatch')].find(s => s.title === colorObj.label);
+    if (activeSwatch) activeSwatch.classList.add('active');
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+    const form    = document.getElementById('contact-form');
+    const success = document.getElementById('form-success');
+    const btn     = form.querySelector('.form-submit');
+    btn.textContent = 'Sending...';
+    btn.disabled    = true;
+    try {
+        const res = await fetch(form.action, {
+            method:'POST', body:new FormData(form), headers:{ Accept:'application/json' },
+        });
+        if (res.ok) {
+            form.style.display = 'none';
+            success.style.display = 'block';
+        } else { btn.textContent = 'Try again'; btn.disabled = false; }
+    } catch { btn.textContent = 'Try again'; btn.disabled = false; }
+}
+</script>
 
 </body>
 </html>
