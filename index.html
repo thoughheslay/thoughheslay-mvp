@@ -29,18 +29,21 @@
             --card:       #1d1813;
             --img-bg:     #100d09;
             --border:     #2b261f;
-            --ash:        #b39873;   /* primary accent, readable on dark */
-            --ash-soft:   #8B7355;
-            --ash-dim:    #6a5b44;
-            --text:       #ece8e1;
-            --muted:      #9a8f80;
-            --faint:      #5a5247;
+            --ash:        #c9ad84;   /* brightened accent for contrast */
+            --ash-soft:   #b39873;
+            --ash-dim:    #7a6a50;
+            --text:       #f2efe9;   /* brightened main text */
+            --muted:      #b0a596;   /* brightened secondary text */
+            --faint:      #6a6253;   /* brightened faint */
         }
 
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+            background: #14110d;
+        }
 
         body {
-            background: var(--bg);
+            background: #14110d;
             color: var(--text);
             font-family: 'IM Fell English', Georgia, serif;
             -webkit-font-smoothing: antialiased;
@@ -85,6 +88,7 @@
         .view.active { display: block; opacity: 1; }
         .view.fade-out { opacity: 0; }
         #view-product, #view-contact { background: var(--subpage); min-height: 100vh; }
+        #view-home { background: #14110d; min-height: 100vh; }
 
         /* ════════ HERO ════════ */
         .hero {
@@ -93,59 +97,158 @@
             align-items: center; justify-content: center;
             text-align: center;
             padding: 3rem 2rem;
+            position: relative;
+        }
+        .scroll-down {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scrollPulse 2.6s ease-in-out infinite;
+        }
+        /* Vertical twin of the phrase arrow: 26px line + 7px down-tip */
+        .scroll-down-line {
+            width: 1px;
+            height: 26px;
+            background: var(--ash);
+            position: relative;
+        }
+        .scroll-down-line::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -3px;
+            width: 7px;
+            height: 7px;
+            border-right: 1px solid var(--ash);
+            border-bottom: 1px solid var(--ash);
+            transform: rotate(45deg);
+        }
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.85; }
         }
         .hero-inner {
-            max-width: 580px; width: 100%;
+            max-width: 800px; width: 100%;
             display: flex; flex-direction: column; align-items: center;
         }
         .hero-eyebrow {
             font-family: 'Cinzel', serif;
-            font-size: 0.82rem;
-            letter-spacing: 0.45em;
+            font-size: 1rem;
+            letter-spacing: 0.5em;
             color: var(--ash);
             text-transform: uppercase;
-            margin-bottom: 2.2rem;
-            text-indent: 0.45em;
+            margin-bottom: 3rem;
+            text-indent: 0.5em;
         }
         .hero-title {
             font-family: 'Cinzel', serif;
-            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-size: clamp(3rem, 8.5vw, 5.8rem);
             font-weight: 600;
             letter-spacing: 0.2em;
             color: #fff;
             text-transform: uppercase;
             white-space: nowrap;
-            line-height: 1.1;
-            margin-bottom: 2.4rem;
+            line-height: 1.08;
             text-indent: 0.2em;
         }
-        .ash-rule { width: 2.5rem; height: 1px; background: var(--ash); margin-bottom: 2.6rem; }
 
-        .hero-lede {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: 1.35rem;
-            line-height: 1.7;
-            color: var(--text);
-            margin-bottom: 1.4rem;
+        /* ════════ SCREEN 2 — MANIFESTO (left-aligned) ════════ */
+        .manifesto {
+            min-height: calc(100vh - 64px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 6rem 2.5rem;
+            position: relative;
+            border-top: 1px solid var(--border);
+            text-align: center;
         }
-        .hero-because {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: 1.15rem;
-            line-height: 1.7;
-            color: var(--ash);
-            margin-bottom: 2.6rem;
-        }
-        .hero-cta {
+        /* chapter marker centered on the divider */
+        .manifesto-mark {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #14110d;
+            padding: 0 1.4rem;
             font-family: 'Cinzel', serif;
-            font-size: 0.8rem;
-            letter-spacing: 0.28em;
+            font-size: 0.68rem;
+            letter-spacing: 0.45em;
+            color: var(--ash);
+            text-transform: uppercase;
+            text-indent: 0.45em;
+        }
+        .manifesto-inner {
+            max-width: 640px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .manifesto-lede {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: clamp(1.5rem, 2.8vw, 2rem);
+            line-height: 1.6;
+            color: #f7f4ee;
+            margin-bottom: 2.4rem;
+        }
+        .manifesto-because {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: clamp(1.15rem, 2vw, 1.4rem);
+            line-height: 1.65;
+            color: #e0c9a4;
+            margin-bottom: 0;
+        }
+        /* large pause between principle and the exchange */
+        .manifesto-gap { height: clamp(3.5rem, 9vw, 7rem); }
+        /* third layer — the exchange, the climax (the one moment that grows) */
+        .manifesto-exchange {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+            line-height: 1.5;
+            color: var(--text);
+            margin-bottom: 3rem;
+        }
+        .manifesto-exchange .exchange-line {
+            font-family: 'Cinzel', serif;
+            font-style: normal;
+            font-weight: 400;
+            font-size: clamp(1.5rem, 3vw, 2.1rem);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #ffffff;
+            display: block;
+            margin-top: 1.4rem;
+            line-height: 1.25;
+            text-indent: 0.12em;
+        }
+        .manifesto-rule {
+            width: 3rem; height: 1px; background: var(--ash-dim);
+            margin: 0 auto 3rem;
+        }
+        .manifesto-cta {
+            font-family: 'Cinzel', serif;
+            font-size: 0.86rem;
+            letter-spacing: 0.3em;
             color: var(--muted);
             text-transform: uppercase;
-            line-height: 2;
-            text-indent: 0.28em;
+            line-height: 1.9;
+            text-indent: 0.3em;
         }
+        .scroll-down-static { bottom: 2.5rem; }
 
         /* ════════ COLLECTION ════════ */
         .collection { max-width: 1100px; margin: 0 auto; padding: 4rem 2.5rem 2rem; }
@@ -370,7 +473,10 @@
         /* ── RESPONSIVE ── */
         @media (max-width: 640px) {
             .hero-title { white-space: normal; letter-spacing: 0.12em; }
-            .hero-lede { font-size: 1.2rem; }
+            .manifesto { padding: 5rem 1.8rem; }
+            .manifesto-lede { font-size: 1.5rem; }
+            .manifesto-because { font-size: 1.1rem; }
+            .manifesto-exchange { font-size: 1.6rem; }
             .phrase-row { padding: 1.8rem 0.5rem 1.8rem 1.5rem; }
             .phrase-ref { display: none; }
             .phrase-note { font-size: 1rem; }
@@ -392,15 +498,37 @@
 <!-- ══════════ HOME ══════════ -->
 <div id="view-home" class="view active">
 
+    <!-- Screen 1: the declaration -->
     <section class="hero">
         <div class="hero-inner">
             <p class="hero-eyebrow">From the Ash</p>
             <h1 class="hero-title">Yet Will I Trust</h1>
-            <div class="ash-rule"></div>
-            <p class="hero-lede">We did not start with fabric.<br>We started with the word.</p>
-            <p class="hero-because">Because a word can bear a weight the body cannot.</p>
-            <p class="hero-cta">Six of them.<br>Enter at your own weight.</p>
         </div>
+        <button class="scroll-down" onclick="document.querySelector('.manifesto').scrollIntoView({behavior:'smooth'})" aria-label="Scroll down">
+            <span class="scroll-down-line"></span>
+        </button>
+    </section>
+
+    <!-- Screen 2: the manifesto -->
+    <section class="manifesto">
+        <span class="manifesto-mark">The Word</span>
+        <div class="manifesto-inner">
+            <p class="manifesto-lede">We did not start with fabric.<br>We started with the word.</p>
+            <p class="manifesto-because">Because a word can bear a weight the body cannot.</p>
+
+            <div class="manifesto-gap"></div>
+
+            <p class="manifesto-exchange">
+                He wore our sin and bore our shame.<br>
+                <span class="exchange-line">We wear his word.</span>
+            </p>
+
+            <div class="manifesto-rule"></div>
+            <p class="manifesto-cta">Six of them.<br>Enter at your own weight.</p>
+        </div>
+        <button class="scroll-down scroll-down-static" onclick="document.querySelector('.collection').scrollIntoView({behavior:'smooth'})" aria-label="Scroll to collection">
+            <span class="scroll-down-line"></span>
+        </button>
     </section>
 
     <section class="collection">
@@ -442,7 +570,7 @@
         <h2 class="contact-title">Get In Touch</h2>
         <p class="contact-sub">For wholesale, press, or anything else worth saying.</p>
         <form class="contact-form" id="contact-form"
-              action="https://formspree.io/f/xbdvrowl" method="POST" onsubmit="handleSubmit(event)">
+              action="https://formspree.io/f/YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event)">
             <div class="form-field">
                 <label class="form-label" for="c-name">Name</label>
                 <input class="form-input" id="c-name" name="name" type="text" required autocomplete="off">
