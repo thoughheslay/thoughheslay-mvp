@@ -15,10 +15,14 @@
   --ink:         #221d17;   /* charcoal text on paper */
   --ink-soft:    #5a5044;
 
+  /* studio mat — light backdrop so product photos hold their texture */
+  --studio:      #e3dccd;
+  --studio-ink:  #6b6051;   /* caption text on the mat */
+
   /* gold — main accent, "what fire leaves behind" */
   --gold:        #c9a86a;
   --gold-deep:   #8f7338;
-  --gold-dim:    #8a7a55;
+  --gold-dim:    #b89c62;
   --gold-edge:   #9c7f42;
 
   /* oxidized blood — the suffering side, used as rare重音 */
@@ -80,11 +84,11 @@ a { color: inherit; text-decoration: none; }
 .site-header .logo { height: 28px; }
 .site-header .logo img { height: 28px; width: auto; }
 .header-nav {
-  font-family: var(--sacred); font-size: 0.66rem; letter-spacing: 0.28em;
-  text-transform: uppercase; color: var(--on-dark-mut);
+  font-family: var(--sacred); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.26em;
+  text-transform: uppercase; color: var(--gold);
   transition: color 0.4s ease;
 }
-.header-nav:hover { color: var(--gold); }
+.header-nav:hover { color: #e7cf97; }
 @media (max-width: 600px) {
   .site-header { height: 56px; }
   .site-header .logo, .site-header .logo img { height: 23px; }
@@ -317,19 +321,26 @@ a.six-item:hover .six-word.blood-word { color: #a8463f; }
 .version-body em { font-style: italic; color: var(--gold); }
 
 /* image frame / placeholder */
-.shot { margin: clamp(2rem,5vh,3.5rem) 0; }
+.shot {
+  margin: clamp(2rem,5vh,3.5rem) 0;
+  background: var(--studio);
+  padding: clamp(0.9rem, 2.6vw, 1.5rem);
+  border-radius: 3px;
+  box-shadow: 0 16px 44px rgba(0,0,0,0.42);
+}
 .shot img { width: 100%; border-radius: 2px; }
 .shot-ph {
-  width: 100%; aspect-ratio: 4/5; border: 1px solid var(--hair);
+  width: 100%; aspect-ratio: 4/5; border: 1px solid rgba(34,29,23,0.10);
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #15110d, #1b1611);
+  background: linear-gradient(135deg, #e7e0d1, #d5ccba);
   font-family: var(--sacred); font-size: 0.62rem; letter-spacing: 0.3em;
-  text-transform: uppercase; color: var(--on-dark-faint); border-radius: 2px;
+  text-transform: uppercase; color: #8a7c63; border-radius: 2px;
 }
 .shot-cap {
   font-family: var(--body); font-style: italic; font-size: 0.92rem;
-  color: var(--on-dark-faint); margin-top: 0.8rem; text-align: center;
+  color: var(--studio-ink); margin-top: 0.9rem; text-align: center;
 }
+.shot-cap em { color: var(--gold-deep); }
 
 /* hidden weight — delayed detonation */
 .weight { color: #221d16; transition: color 1.2s ease; cursor: default; }
