@@ -1,888 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THOUGH HE SLAY ME</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
-    <style>
-        /* ════════════════════════════════════════════
-           THOUGH HE SLAY ME — Brand Site
-           Structure: HOME (hero + collection) / PRODUCT / CONTACT
-           Data model (see PHRASES below):
-             phrase → products{ hoodie|tshirt|cap } → styles[] → colors[]
-           To extend:
-             - new color: add to COLORS + include id in a style's colors[]
-             - new style: push {id,name,colors} into a product's styles[]
-             - new phrase: add a key to PHRASES
-           Image naming:
-             [phrase]-[type]-[style]-[color].png   e.g. surrender-hoodie-01-black.png
-             cap (no color):  [phrase]-cap-[style].png
-        ════════════════════════════════════════════ */
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg:         #14110d;   /* warm deep charcoal */
-            --subpage:    #1a1610;   /* subtly lifted subpage bg */
-            --card:       #1d1813;
-            --img-bg:     #100d09;
-            --border:     #2b261f;
-            --ash:        #c9ad84;   /* brightened accent for contrast */
-            --ash-soft:   #b39873;
-            --ash-dim:    #7a6a50;
-            --text:       #f2efe9;   /* brightened main text */
-            --muted:      #b0a596;   /* brightened secondary text */
-            --faint:      #6a6253;   /* brightened faint */
-        }
-
-        html {
-            scroll-behavior: smooth;
-            background: #14110d;
-        }
-
-        body {
-            background: #14110d;
-            color: var(--text);
-            font-family: 'IM Fell English', Georgia, serif;
-            -webkit-font-smoothing: antialiased;
-            min-height: 100vh;
-        }
-
-        /* ── HEADER ── */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(20,17,13,0.96);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-        }
-        .header-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 2.5rem;
-            height: 64px;
-            display: flex;
-            align-items: center;
-        }
-        .brand-line { display: flex; align-items: center; gap: 1.4rem; flex: 1; }
-        .brand-line::before, .brand-line::after {
-            content: ''; flex: 1; height: 1px; background: var(--faint);
-        }
-        .brand-name {
-            font-family: 'Cinzel', serif;
-            font-size: 0.72rem;
-            letter-spacing: 0.4em;
-            color: var(--text);
-            white-space: nowrap;
-            text-transform: uppercase;
-            cursor: pointer;
-            background: none; border: none; padding: 0;
-            text-indent: 0.4em;
-        }
-
-        /* ── VIEW TRANSITION ── */
-        .view { display: none; opacity: 0; transition: opacity 0.45s ease; }
-        .view.active { display: block; opacity: 1; }
-        .view.fade-out { opacity: 0; }
-        #view-product, #view-contact { background: var(--subpage); min-height: 100vh; }
-        #view-home { background: #14110d; min-height: 100vh; }
-
-        /* ════════ HERO ════════ */
-        .hero {
-            min-height: calc(100vh - 64px);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center;
-            padding: 3rem 2rem;
-            position: relative;
-        }
-        .scroll-down {
-            position: absolute;
-            bottom: 2.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: scrollPulse 2.6s ease-in-out infinite;
-        }
-        /* Vertical twin of the phrase arrow: 26px line + 7px down-tip */
-        .scroll-down-line {
-            width: 1px;
-            height: 26px;
-            background: var(--ash);
-            position: relative;
-        }
-        .scroll-down-line::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -3px;
-            width: 7px;
-            height: 7px;
-            border-right: 1px solid var(--ash);
-            border-bottom: 1px solid var(--ash);
-            transform: rotate(45deg);
-        }
-        @keyframes scrollPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.85; }
-        }
-        .hero-inner {
-            max-width: 800px; width: 100%;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .hero-eyebrow {
-            font-family: 'Cinzel', serif;
-            font-size: 1rem;
-            letter-spacing: 0.5em;
-            color: var(--ash);
-            text-transform: uppercase;
-            margin-bottom: 3rem;
-            text-indent: 0.5em;
-        }
-        .hero-title {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(3rem, 8.5vw, 5.8rem);
-            font-weight: 600;
-            letter-spacing: 0.2em;
-            color: #fff;
-            text-transform: uppercase;
-            white-space: nowrap;
-            line-height: 1.08;
-            text-indent: 0.2em;
-        }
-
-        /* ════════ SCREEN 2 — MANIFESTO (left-aligned) ════════ */
-        .manifesto {
-            min-height: calc(100vh - 64px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 6rem 2.5rem;
-            position: relative;
-            border-top: 1px solid var(--border);
-            text-align: center;
-        }
-        /* chapter marker centered on the divider */
-        .manifesto-mark {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #14110d;
-            padding: 0 1.4rem;
-            font-family: 'Cinzel', serif;
-            font-size: 0.68rem;
-            letter-spacing: 0.45em;
-            color: var(--ash);
-            text-transform: uppercase;
-            text-indent: 0.45em;
-        }
-        .manifesto-inner {
-            max-width: 640px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .manifesto-lede {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: clamp(1.5rem, 2.8vw, 2rem);
-            line-height: 1.6;
-            color: #f7f4ee;
-            margin-bottom: 2.4rem;
-        }
-        .manifesto-because {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: clamp(1.15rem, 2vw, 1.4rem);
-            line-height: 1.65;
-            color: #e0c9a4;
-            margin-bottom: 0;
-        }
-        /* large pause between principle and the exchange */
-        .manifesto-gap { height: clamp(3.5rem, 9vw, 7rem); }
-        /* third layer — the exchange, the climax (the one moment that grows) */
-        .manifesto-exchange {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-            line-height: 1.5;
-            color: var(--text);
-            margin-bottom: 3rem;
-        }
-        .manifesto-exchange .exchange-line {
-            font-family: 'Cinzel', serif;
-            font-style: normal;
-            font-weight: 400;
-            font-size: clamp(1.5rem, 3vw, 2.1rem);
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #ffffff;
-            display: block;
-            margin-top: 1.4rem;
-            line-height: 1.25;
-            text-indent: 0.12em;
-        }
-        .manifesto-rule {
-            width: 3rem; height: 1px; background: var(--ash-dim);
-            margin: 0 auto 3rem;
-        }
-        .manifesto-cta {
-            font-family: 'Cinzel', serif;
-            font-size: 0.86rem;
-            letter-spacing: 0.3em;
-            color: var(--muted);
-            text-transform: uppercase;
-            line-height: 1.9;
-            text-indent: 0.3em;
-        }
-        .scroll-down-static { bottom: 2.5rem; }
-
-        /* ════════ COLLECTION ════════ */
-        .collection { max-width: 1100px; margin: 0 auto; padding: 4rem 2.5rem 2rem; }
-        .section-label {
-            font-family: 'Cinzel', serif;
-            font-size: 0.8rem;
-            letter-spacing: 0.42em;
-            color: var(--muted);
-            text-transform: uppercase;
-            padding-bottom: 1.2rem;
-            border-bottom: 1px solid var(--border);
-            text-indent: 0.42em;
-        }
-        .phrase-list { list-style: none; }
-        .phrase-item { position: relative; border-bottom: 1px solid var(--border); cursor: pointer; }
-        .phrase-item::before {
-            content: ''; position: absolute; left: 0; top: 0;
-            width: 2px; height: 0; background: var(--ash);
-            transition: height 0.45s ease;
-        }
-        .phrase-item:hover::before { height: 100%; }
-        .phrase-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 2.2rem 1.5rem 2.2rem 2.5rem;
-            transition: padding-left 0.45s ease;
-            gap: 1.5rem;
-        }
-        .phrase-item:hover .phrase-row { padding-left: 3.2rem; }
-        .phrase-left { display: flex; flex-direction: column; min-width: 0; }
-        .phrase-word {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(1.5rem, 3vw, 2.1rem);
-            letter-spacing: 0.12em;
-            color: var(--text);
-            text-transform: uppercase;
-            line-height: 1.25;
-            transition: color 0.3s, letter-spacing 0.3s, font-style 0.3s;
-        }
-        .phrase-item:hover .phrase-word {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            color: #fff;
-            letter-spacing: 0.04em;
-        }
-        .phrase-note {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: 1.1rem;
-            color: var(--ash);
-            max-height: 0; overflow: hidden; opacity: 0;
-            transition: max-height 0.45s ease, opacity 0.4s ease, margin-top 0.45s ease;
-            line-height: 1.5;
-        }
-        .phrase-item:hover .phrase-note { max-height: 100px; opacity: 1; margin-top: 0.7rem; }
-        .phrase-right { display: flex; align-items: center; gap: 1.6rem; flex-shrink: 0; }
-        .phrase-ref {
-            font-family: 'IM Fell English', serif;
-            font-style: italic;
-            font-size: 1rem;
-            color: var(--ash);
-            opacity: 0; transition: opacity 0.35s ease;
-            white-space: nowrap;
-        }
-        .phrase-item:hover .phrase-ref { opacity: 1; }
-        .phrase-arrow {
-            width: 26px; height: 1px; background: var(--faint);
-            position: relative; transition: width 0.3s, background 0.3s; flex-shrink: 0;
-        }
-        .phrase-arrow::after {
-            content: ''; position: absolute; right: 0; top: -3px;
-            width: 7px; height: 7px;
-            border-right: 1px solid var(--faint); border-top: 1px solid var(--faint);
-            transform: rotate(45deg); transition: border-color 0.3s;
-        }
-        .phrase-item:hover .phrase-arrow { width: 38px; background: var(--ash); }
-        .phrase-item:hover .phrase-arrow::after { border-color: var(--ash); }
-
-        /* Survived + footer */
-        .survived-bar { border-top: 1px solid var(--border); padding: 3.5rem 2.5rem; text-align: center; }
-        .survived-text {
-            font-family: 'IM Fell English', serif; font-style: italic;
-            font-size: 1.2rem; color: var(--ash); letter-spacing: 0.03em;
-        }
-        footer { border-top: 1px solid var(--border); padding: 2.8rem 2.5rem; text-align: center; }
-        .footer-contact-link {
-            font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.32em;
-            color: var(--muted); text-transform: uppercase;
-            background: none; border: none; cursor: pointer;
-            margin-bottom: 1.8rem; transition: color 0.3s; text-indent: 0.32em;
-        }
-        .footer-contact-link:hover { color: var(--text); }
-        .footer-brand {
-            font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.45em;
-            color: var(--faint); text-transform: uppercase; margin-bottom: 0.6rem; text-indent: 0.45em;
-        }
-        .footer-copy {
-            font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.28em;
-            color: var(--faint); text-transform: uppercase; text-indent: 0.28em;
-        }
-
-        /* ════════ PRODUCT VIEW ════════ */
-        .product-header { max-width: 1100px; margin: 0 auto; padding: 4.5rem 2.5rem 2.5rem; border-bottom: 1px solid var(--border); }
-        .back-btn {
-            font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.32em;
-            color: var(--muted); text-transform: uppercase;
-            background: none; border: none; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 0.8rem;
-            margin-bottom: 2.8rem; transition: color 0.3s;
-        }
-        .back-btn::before { content: ''; width: 22px; height: 1px; background: currentColor; transition: width 0.3s; }
-        .back-btn:hover { color: var(--text); }
-        .back-btn:hover::before { width: 30px; }
-        .product-headline {
-            font-family: 'Cinzel', serif; font-size: clamp(2.2rem, 5vw, 3.8rem);
-            letter-spacing: 0.18em; color: #fff; text-transform: uppercase;
-            line-height: 1.1; margin-bottom: 1rem;
-        }
-        .product-subline {
-            font-family: 'IM Fell English', serif; font-style: italic;
-            font-size: 1.15rem; color: var(--ash); line-height: 1.6;
-        }
-        .type-tabs { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem; display: flex; border-bottom: 1px solid var(--border); }
-        .type-tab {
-            font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.32em;
-            text-transform: uppercase; color: var(--muted);
-            background: none; border: none; border-bottom: 2px solid transparent;
-            margin-bottom: -1px; padding: 1.6rem 2rem 1.6rem 0; cursor: pointer;
-            transition: color 0.2s, border-color 0.2s;
-        }
-        .type-tab.active { color: var(--text); border-bottom-color: var(--ash); }
-        .type-tab:hover:not(.active) { color: var(--text); }
-
-        /* grid adapts: 1 style = centered single, 2+ styles = multi-column */
-        .product-grid {
-            max-width: 1100px; margin: 0 auto; padding: 3.5rem 2.5rem 6rem;
-            display: grid; gap: 1.8rem;
-            justify-content: center;
-        }
-        .product-grid.single { grid-template-columns: minmax(0, 520px); }
-        .product-grid.multi  { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-
-        .product-card { border: 1px solid var(--border); background: var(--card); transition: border-color 0.3s; }
-        .product-card:hover { border-color: var(--ash-dim); }
-        .card-img-wrap {
-            aspect-ratio: 1 / 1; background: var(--img-bg);
-            border-bottom: 1px solid var(--border); overflow: hidden;
-            display: flex; align-items: center; justify-content: center; position: relative;
-        }
-        .card-img {
-            width: 100%; height: 100%; object-fit: cover; opacity: 0.9; display: block;
-            transition: opacity 0.3s ease; position: absolute; top: 0; left: 0;
-        }
-        .card-img.fade-out { opacity: 0; }
-        .card-placeholder {
-            font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.25em;
-            color: var(--faint); text-transform: uppercase; text-align: center; padding: 1rem;
-        }
-        .card-body { padding: 1.4rem; }
-        .card-name {
-            font-family: 'Cinzel', serif; font-size: 0.82rem; letter-spacing: 0.1em;
-            color: var(--text); text-transform: uppercase; line-height: 1.6;
-            margin-bottom: 1.2rem; min-height: 2.6em;
-        }
-        .card-style-name {
-            font-family: 'IM Fell English', serif; font-style: italic;
-            font-size: 0.95rem; color: var(--ash); margin-bottom: 0.4rem;
-        }
-        .swatch-row { display: flex; gap: 0.6rem; margin-bottom: 1.2rem; }
-        .swatch {
-            width: 24px; height: 24px; border-radius: 50%;
-            border: 1px solid var(--border); cursor: pointer;
-            transition: border-color 0.2s, transform 0.2s; flex-shrink: 0;
-        }
-        .swatch:hover { transform: scale(1.15); }
-        .swatch.active { border: 2px solid var(--ash); transform: scale(1.1); }
-        .card-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border); }
-        .card-spec {
-            font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.18em;
-            color: var(--muted); text-transform: uppercase;
-        }
-        .card-status {
-            font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.18em;
-            color: var(--ash-dim); text-transform: uppercase;
-        }
-
-        /* ════════ CONTACT VIEW ════════ */
-        .contact-wrap { max-width: 580px; margin: 0 auto; padding: 5rem 2.5rem 7rem; }
-        .contact-title {
-            font-family: 'Cinzel', serif; font-size: clamp(1.8rem, 4.5vw, 2.8rem);
-            letter-spacing: 0.18em; color: #fff; text-transform: uppercase;
-            margin-bottom: 1rem; margin-top: 2.8rem;
-        }
-        .contact-sub {
-            font-family: 'IM Fell English', serif; font-style: italic;
-            font-size: 1.15rem; color: var(--ash); margin-bottom: 3.5rem; line-height: 1.6;
-        }
-        .contact-form { display: flex; flex-direction: column; gap: 1.8rem; }
-        .form-field { display: flex; flex-direction: column; gap: 0.6rem; }
-        .form-label {
-            font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.32em;
-            color: var(--muted); text-transform: uppercase;
-        }
-        .form-input, .form-textarea {
-            background: transparent; border: none; border-bottom: 1px solid var(--border);
-            color: var(--text); font-family: 'IM Fell English', serif; font-size: 1.1rem;
-            padding: 0.7rem 0; outline: none; transition: border-color 0.3s; width: 100%; resize: none;
-        }
-        .form-input:focus, .form-textarea:focus { border-bottom-color: var(--ash); }
-        .form-textarea { min-height: 120px; line-height: 1.7; }
-        .form-submit {
-            font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.4em;
-            text-transform: uppercase; background: var(--ash); color: var(--bg);
-            border: none; padding: 1.1rem 2.8rem; cursor: pointer; align-self: flex-start;
-            transition: background 0.3s; margin-top: 0.6rem; text-indent: 0.4em;
-        }
-        .form-submit:hover { background: var(--text); }
-        .form-success {
-            font-family: 'IM Fell English', serif; font-style: italic;
-            font-size: 1.2rem; color: var(--ash); padding: 3rem 0; display: none;
-        }
-
-        /* ── RESPONSIVE ── */
-        @media (max-width: 640px) {
-            .hero-title { white-space: normal; letter-spacing: 0.12em; }
-            .manifesto { padding: 5rem 1.8rem; }
-            .manifesto-lede { font-size: 1.5rem; }
-            .manifesto-because { font-size: 1.1rem; }
-            .manifesto-exchange { font-size: 1.6rem; }
-            .phrase-row { padding: 1.8rem 0.5rem 1.8rem 1.5rem; }
-            .phrase-ref { display: none; }
-            .phrase-note { font-size: 1rem; }
-            .header-inner { padding: 0 1.5rem; }
-        }
-        @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Though He Slay Me</title>
+<meta name="description" content="A faith-rooted streetwear brand. We make the other half — the heavy one. Wear what you've survived.">
+<link rel="icon" type="image/svg+xml" href="THSM_square_black.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<header>
-    <div class="header-inner">
-        <div class="brand-line">
-            <button class="brand-name" onclick="showView('home')">Though He Slay Me</button>
-        </div>
-    </div>
+<header class="site-header">
+  <a class="logo" href="index.html" aria-label="Though He Slay Me — home">
+    <img src="THSM_primary_on-dark.svg" alt="Though He Slay Me">
+  </a>
+  <a class="header-nav" href="#the-six">The Collection</a>
 </header>
 
-<!-- ══════════ HOME ══════════ -->
-<div id="view-home" class="view active">
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow reveal">From the Ash</p>
+  <h1 class="hero-title reveal">Yet Will I Trust</h1>
+  <div class="hero-rule reveal"></div>
+  <div class="scroll-cue">Scroll</div>
+</section>
 
-    <!-- Screen 1: the declaration -->
-    <section class="hero">
-        <div class="hero-inner">
-            <p class="hero-eyebrow">From the Ash</p>
-            <h1 class="hero-title">Yet Will I Trust</h1>
-        </div>
-        <button class="scroll-down" onclick="document.querySelector('.manifesto').scrollIntoView({behavior:'smooth'})" aria-label="Scroll down">
-            <span class="scroll-down-line"></span>
-        </button>
-    </section>
+<!-- THE WORD (light reading zone) -->
+<section class="zone zone-paper grain-paper" id="the-word">
+  <div class="wrap">
+    <p class="eyebrow reveal">The Word</p>
+    <p class="word-lede reveal">We did not start with fabric.<br>We started with the word.</p>
+    <p class="word-body reveal">God spoke, and there was a world. His word did not burn out somewhere back in history — it is <span class="word-accent">still alive</span>, still doing the thing it was sent to do.</p>
+    <p class="word-body reveal">So we wear it. A declaration of what we believe, and a reminder of what we are being made into.</p>
+  </div>
+</section>
 
-    <!-- Screen 2: the manifesto -->
-    <section class="manifesto">
-        <span class="manifesto-mark">The Word</span>
-        <div class="manifesto-inner">
-            <p class="manifesto-lede">We did not start with fabric.<br>We started with the word.</p>
-            <p class="manifesto-because">Because a word can bear a weight the body cannot.</p>
+<!-- TRANSITION -->
+<section class="bridge">
+  <p class="bridge-line reveal">Not every word is worth wearing.</p>
+</section>
 
-            <div class="manifesto-gap"></div>
+<!-- STANCE / ANTI-EGO (dark) -->
+<section class="zone zone-dark grain-dark stance" id="stance">
+  <div class="wrap">
+    <p class="stance-line reveal">Streetwear has one verb: <em>more</em>. Be more seen, more loud, more yourself.</p>
+    <p class="stance-small reveal">It is the oldest religion there is — the worship of the self.</p>
+    <p class="stance-small reveal"><strong>We are built on the opposite motion.</strong> Not raising the self, but setting it down. Not your name, but his.</p>
+    <p class="stance-small reveal">And we say it from faith's heavy side — the half left off the bright merch: <span class="blood">suffering, being brought low, holding on while you are being struck.</span></p>
+    <p class="stance-close reveal">That's why this brand exists.</p>
+  </div>
+</section>
 
-            <p class="manifesto-exchange">
-                He wore our sin and bore our shame.<br>
-                <span class="exchange-line">We wear his word.</span>
-            </p>
+<!-- THE SIX (word spectrum) -->
+<section class="zone six grain-dark" id="the-six">
+  <div class="six-head">
+    <p class="eyebrow reveal">The Six</p>
+  </div>
+  <div class="six-list">
 
-            <div class="manifesto-rule"></div>
-            <p class="manifesto-cta">Six of them.<br>Enter at your own weight.</p>
-        </div>
-        <button class="scroll-down scroll-down-static" onclick="document.querySelector('.collection').scrollIntoView({behavior:'smooth'})" aria-label="Scroll to collection">
-            <span class="scroll-down-line"></span>
-        </button>
-    </section>
+    <a class="six-item reveal" href="surrender.html">
+      <div class="six-word">Surrender</div>
+      <div class="six-note">Jacob's hip gave out before his will did.</div>
+      <span class="enter">Enter →</span>
+    </a>
 
-    <section class="collection">
-        <p class="section-label">The Collection</p>
-        <ul class="phrase-list" id="phrase-list"></ul>
-    </section>
-
-    <div class="survived-bar">
-        <p class="survived-text">Wear what you've survived.</p>
+    <div class="six-item reveal">
+      <div class="six-word">Meek</div>
+      <div class="six-note">Strength that has chosen not to use itself.</div>
     </div>
 
-    <footer>
-        <button class="footer-contact-link" onclick="showView('contact')">Contact</button>
-        <p class="footer-brand">Though He Slay Me</p>
-        <p class="footer-copy">© 2026 — All Rights Reserved</p>
-    </footer>
-</div>
-
-<!-- ══════════ PRODUCT ══════════ -->
-<div id="view-product" class="view">
-    <div class="product-header">
-        <button class="back-btn" onclick="showView('home')">Collection</button>
-        <h2 class="product-headline" id="prod-title"></h2>
-        <p class="product-subline" id="prod-subline"></p>
+    <div class="six-item reveal">
+      <div class="six-word">Lowly</div>
+      <div class="six-note">He who holds all things called himself this. So can we.</div>
     </div>
-    <div class="type-tabs" id="type-tabs"></div>
-    <div class="product-grid" id="product-grid"></div>
-    <footer>
-        <button class="footer-contact-link" onclick="showView('contact')">Contact</button>
-        <p class="footer-brand">Though He Slay Me</p>
-        <p class="footer-copy">© 2026 — All Rights Reserved</p>
-    </footer>
-</div>
 
-<!-- ══════════ CONTACT ══════════ -->
-<div id="view-contact" class="view">
-    <div class="contact-wrap">
-        <button class="back-btn" onclick="showView('home')">Home</button>
-        <h2 class="contact-title">Get In Touch</h2>
-        <p class="contact-sub">For wholesale, press, or anything else worth saying.</p>
-        <form class="contact-form" id="contact-form"
-              action="https://formspree.io/f/YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event)">
-            <div class="form-field">
-                <label class="form-label" for="c-name">Name</label>
-                <input class="form-input" id="c-name" name="name" type="text" required autocomplete="off">
-            </div>
-            <div class="form-field">
-                <label class="form-label" for="c-email">Email</label>
-                <input class="form-input" id="c-email" name="email" type="email" required autocomplete="off">
-            </div>
-            <div class="form-field">
-                <label class="form-label" for="c-msg">Message</label>
-                <textarea class="form-textarea" id="c-msg" name="message" rows="5" required></textarea>
-            </div>
-            <button class="form-submit" type="submit">Send</button>
-        </form>
-        <p class="form-success" id="form-success">Received. We'll be in touch.</p>
+    <a class="six-item reveal" href="though-he-slay-me.html">
+      <div class="six-word blood-word">Though He Slay Me</div>
+      <div class="six-note">Spoken from ash, not comfort.</div>
+      <span class="enter">Enter →</span>
+    </a>
+
+    <div class="six-item reveal">
+      <div class="six-word blood-word">He Wept</div>
+      <div class="six-note">He is not unmoved. He never was.</div>
     </div>
-    <footer>
-        <p class="footer-brand">Though He Slay Me</p>
-        <p class="footer-copy">© 2026 — All Rights Reserved</p>
-    </footer>
-</div>
 
-<script>
-/* ════════════════════════════════════════════
-   DATA
-   ──────────────────────────────────────────
-   COLORS: master color list. hex used for swatch fill.
-   PHRASES: each phrase has products{hoodie,tshirt,cap}.
-     Each product has spec + styles[].
-     Each style: { id, name, colors:[colorId,...] }  (cap: colors null)
-   Image file names are derived, not stored:
-     hoodie/tshirt:  {phrase}-{type}-{styleId}-{colorId}.png
-     cap:            {phrase}-cap-{styleId}.png
-   To add a 2nd hoodie style for surrender, just add another
-   object to surrender.products.hoodie.styles — UI updates itself.
-════════════════════════════════════════════ */
+    <div class="six-item reveal">
+      <div class="six-word">Death, Where Is Thy Sting</div>
+      <div class="six-note">Not a question. A declaration.</div>
+    </div>
 
-const COLORS = [
-    { id: 'black',   label: 'Black',   hex: '#1a1814' },
-    { id: 'oatmeal', label: 'Oatmeal', hex: '#e8dcc8' },
-    { id: 'red',     label: 'Red',     hex: '#8B2020'  },
-];
+  </div>
+</section>
 
-// default single style helper (most products currently have one style)
-function oneStyle(colors) {
-    return [{ id: '01', name: null, colors }];
-}
-const TRI = ['black','oatmeal','red'];
+<!-- ABOUT -->
+<section class="zone zone-paper grain-paper about" id="about">
+  <div class="wrap">
+    <p class="eyebrow reveal">The Story</p>
+    <h2 class="about-title reveal">A Beautiful Misunderstanding</h2>
+    <p class="about-sub reveal">Why this brand exists.</p>
+    <div class="about-body">
+      <p class="reveal">One day at work, I saw a coworker in a hoodie with a single word printed across the chest, big and plain: <span class="big">OBEY.</span></p>
+      <p class="reveal">I'd been baptized a few weeks before, and I was standing in a strange place in my life, and that word hit me the second I saw it. I can't fully explain why. I'd spent most of my life as a rebel — it was the thing I was proudest of — and somewhere in me that whole identity had quietly started coming apart. I was tired of rebellion. I was tired of myself. And here was this word, worn across a stranger's chest like a flag: OBEY.</p>
+      <p class="reveal">I wanted it. Not the way you're forced to obey. The way you choose to.</p>
+      <p class="reveal">Here's the part that still makes me laugh. It was a misunderstanding. The brand never meant it the way I read it. OBEY, in its own hands, means closer to the opposite — <em>I see what you're doing, I see you want me to bow, and I won't.</em> It's irony aimed at every authority that ever tried to make you fall in line.</p>
+      <p class="reveal">And once I saw that, I started seeing it everywhere. Most streetwear is selling the same thing. Be yourself. Stand out. Answer to no one. A whole closet full of slogans, and underneath every one of them, the same small god — you.</p>
+      <p class="reveal">I'd worshiped that god a long time. I was good at it. And it had just about wrung me dry.</p>
+      <p class="reveal">So I started to wonder. What if you could take that language — the bold print, the big word across the chest, the attitude — and turn it the other way? What if the most defiant thing a person could wear wasn't one more declaration of himself, but the laying of himself down?</p>
+      <p class="reveal">I didn't want to lose the moment that word first struck me. Because it taught me something I haven't been able to shake since. Words have weight. Real weight. God spoke, and there was a world. And his word didn't burn out somewhere back in history — it's alive, still doing the thing it was sent to do.</p>
+      <p class="reveal">To wear God's word is two things at once. It's a declaration: this is what I believe. And it's a reminder, pressed against you all day long: this is what I'm being made into.</p>
+      <p class="reveal">Maybe I can make a living this way. I hope so. But that was never really the point. The point is that I spent years shouting my own name, and I got tired, and I found something better to wear.</p>
+      <p class="reveal">This brand started with a misunderstanding.</p>
+      <p class="reveal">I've come to think some misunderstandings are beautiful. They walk you somewhere truer than you ever meant to go.</p>
+    </div>
+  </div>
+</section>
 
-const PHRASES = {
-    surrender: {
-        title: 'Surrender',
-        subline: "Jacob's hip gave out before his will did.",
-        note: "Jacob's hip gave out before his will did.",
-        ref: 'Matthew 11:29',
-        products: {
-            hoodie: { spec: '400GSM Heavyweight Hoodie', styles: oneStyle(TRI) },
-            tshirt: { spec: '220GSM Oversized T-Shirt',  styles: oneStyle(TRI) },
-            cap:    { spec: 'Six-Panel Cap',              styles: [{ id:'01', name:null, colors:null }] },
-        }
-    },
-    meek: {
-        title: 'Meek',
-        subline: 'Strength that has chosen not to use itself.',
-        note: 'Strength that has chosen not to use itself.',
-        ref: 'Matthew 11:29',
-        products: {
-            hoodie: { spec: '400GSM Heavyweight Hoodie', styles: oneStyle(TRI) },
-            tshirt: { spec: '220GSM Oversized T-Shirt',  styles: oneStyle(TRI) },
-            cap:    { spec: 'Six-Panel Cap',              styles: [{ id:'01', name:null, colors:null }] },
-        }
-    },
-    lowly: {
-        title: 'Lowly',
-        subline: 'He who holds all things called himself this. So can we.',
-        note: 'He who holds all things called himself this. So can we.',
-        ref: 'Matthew 11:29',
-        products: {
-            hoodie: { spec: '400GSM Heavyweight Hoodie', styles: oneStyle(TRI) },
-            tshirt: { spec: '220GSM Oversized T-Shirt',  styles: oneStyle(TRI) },
-            cap:    { spec: 'Six-Panel Cap',              styles: [{ id:'01', name:null, colors:null }] },
-        }
-    },
-    though: {
-        title: 'Though He Slay Me',
-        subline: 'Spoken from ash, not comfort.',
-        note: 'Spoken from ash, not comfort.',
-        ref: 'Job 13:15',
-        products: {
-            hoodie: { spec: '400GSM Heavyweight Hoodie', styles: oneStyle(TRI) },
-            tshirt: { spec: '220GSM Oversized T-Shirt',  styles: oneStyle(TRI) },
-            cap:    { spec: 'Six-Panel Cap',              styles: [{ id:'01', name:null, colors:null }] },
-        }
-    },
-    wept: {
-        title: 'He Wept',
-        subline: 'He is not unmoved. He never was.',
-        note: 'He is not unmoved. He never was.',
-        ref: 'John 11:35',
-        products: {
-            hoodie: { spec: '400GSM Heavyweight Hoodie', styles: oneStyle(TRI) },
-            tshirt: { spec: '220GSM Oversized T-Shirt',  styles: oneStyle(TRI) },
-            cap:    { spec: 'Six-Panel Cap',              styles: [{ id:'01', name:null, colors:null }] },
-        }
-    },
-    death: {
-        title: 'Death, Where Is Thy Sting',
-        subline: 'Not a question. A declaration.',
-        note: 'Not a question. A declaration.',
-        ref: '1 Corinthians 15:55',
-        products: {
-            hoodie: { spec: '400GSM Heavyweight Hoodie', styles: oneStyle(TRI) },
-            tshirt: { spec: '220GSM Oversized T-Shirt',  styles: oneStyle(TRI) },
-            cap:    { spec: 'Six-Panel Cap',              styles: [{ id:'01', name:null, colors:null }] },
-        }
-    },
-};
+<!-- FOOTER -->
+<footer class="site-footer">
+  <img class="footer-logo" src="THSM_primary_on-dark-padded.svg" alt="Though He Slay Me">
+  <p class="footer-tag">Wear what you've survived</p>
+  <nav class="footer-links">
+    <a href="https://open.substack.com/pub/thoughheslayme" target="_blank" rel="noopener">Substack</a>
+    <a href="https://www.instagram.com/thoughheslaymewear" target="_blank" rel="noopener">Instagram</a>
+  </nav>
+  <p class="footer-fine">© Though He Slay Me. <em>Though he slay me, yet will I trust in him.</em> — Job 13:15</p>
+</footer>
 
-const PHRASE_ORDER = ['surrender','meek','lowly','though','wept','death'];
-const TYPE_LABELS  = { hoodie:'Hoodie', tshirt:'T-Shirt', cap:'Cap' };
-const TYPE_ORDER   = ['hoodie','tshirt','cap'];
-
-/* ════════ STATE ════════ */
-let currentPhrase = null;
-let currentType   = 'hoodie';
-
-/* ════════ HOME: build phrase list ════════ */
-function buildPhraseList() {
-    const ul = document.getElementById('phrase-list');
-    ul.innerHTML = PHRASE_ORDER.map(key => {
-        const p = PHRASES[key];
-        return `
-            <li class="phrase-item" onclick="showProduct('${key}')">
-                <div class="phrase-row">
-                    <div class="phrase-left">
-                        <span class="phrase-word">${p.title}</span>
-                        <span class="phrase-note">${p.note}</span>
-                    </div>
-                    <div class="phrase-right">
-                        <span class="phrase-ref">${p.ref}</span>
-                        <span class="phrase-arrow"></span>
-                    </div>
-                </div>
-            </li>`;
-    }).join('');
-}
-
-/* ════════ VIEW SWITCH ════════ */
-function showView(id) {
-    const current = document.querySelector('.view.active');
-    const next    = document.getElementById('view-' + id);
-    if (!next || current === next) return;
-    if (current) {
-        current.classList.add('fade-out');
-        setTimeout(() => {
-            current.classList.remove('active', 'fade-out');
-            next.classList.add('active', 'fade-out');
-            void next.offsetWidth;
-            next.classList.remove('fade-out');
-            window.scrollTo(0, 0);
-        }, 450);
-    } else {
-        next.classList.add('active');
-        window.scrollTo(0, 0);
-    }
-}
-
-/* ════════ PRODUCT ════════ */
-function showProduct(key) {
-    const p = PHRASES[key];
-    if (!p) return;
-    currentPhrase = key;
-    currentType   = 'hoodie';
-
-    document.getElementById('prod-title').textContent   = p.title;
-    document.getElementById('prod-subline').textContent = p.subline;
-
-    buildTypeTabs();
-    renderGrid();
-    showView('product');
-}
-
-function buildTypeTabs() {
-    const tabs = document.getElementById('type-tabs');
-    tabs.innerHTML = TYPE_ORDER.map((t, i) => `
-        <button class="type-tab ${i === 0 ? 'active' : ''}" data-type="${t}" onclick="setType(this)">
-            ${TYPE_LABELS[t]}
-        </button>`).join('');
-}
-
-function setType(el) {
-    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    currentType = el.dataset.type;
-    renderGrid();
-}
-
-function renderGrid() {
-    const grid    = document.getElementById('product-grid');
-    const p       = PHRASES[currentPhrase];
-    const config  = p.products[currentType];
-    const styles  = config.styles;
-    const isCap   = currentType === 'cap';
-
-    // layout class: single style → centered single column; multiple → multi
-    grid.classList.toggle('single', styles.length === 1);
-    grid.classList.toggle('multi',  styles.length > 1);
-
-    grid.innerHTML = styles.map(style => buildCard(p, currentType, config, style, isCap)).join('');
-}
-
-function buildCard(phraseObj, type, config, style, isCap) {
-    const key       = currentPhrase;
-    const typeLabel = TYPE_LABELS[type];
-    const cardId    = `card-${key}-${type}-${style.id}`;
-    const styleName = style.name ? `<div class="card-style-name">${style.name}</div>` : '';
-
-    if (isCap) {
-        const imgSrc   = `${key}-cap-${style.id}.png`;
-        const nameText = `${phraseObj.title} — ${typeLabel}`;
-        return cardShell({ cardId, imgSrc, nameText, styleName, swatchHTML: '', spec: config.spec });
-    }
-
-    const colorObjs  = COLORS.filter(c => style.colors.includes(c.id));
-    const defaultCol = colorObjs[0];
-    const imgSrc     = `${key}-${type}-${style.id}-${defaultCol.id}.png`;
-    const nameText   = `${phraseObj.title} — ${typeLabel} / ${defaultCol.label}`;
-
-    const swatchHTML = `
-        <div class="swatch-row">
-            ${colorObjs.map(c => `
-                <div class="swatch ${c.id === defaultCol.id ? 'active' : ''}"
-                     style="background:${c.hex}" title="${c.label}"
-                     onclick="switchColor('${key}','${type}','${style.id}','${c.id}','${cardId}')"></div>
-            `).join('')}
-        </div>`;
-
-    return cardShell({ cardId, imgSrc, nameText, styleName, swatchHTML, spec: config.spec });
-}
-
-function cardShell({ cardId, imgSrc, nameText, styleName, swatchHTML, spec }) {
-    return `
-        <div class="product-card" id="${cardId}">
-            <div class="card-img-wrap">
-                <img class="card-img" src="${imgSrc}" alt="${nameText}"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                <p class="card-placeholder" style="display:none">Image Coming Soon</p>
-            </div>
-            <div class="card-body">
-                ${styleName}
-                <div class="card-name" id="${cardId}-name">${nameText}</div>
-                ${swatchHTML}
-                <div class="card-meta">
-                    <span class="card-spec">${spec}</span>
-                    <span class="card-status">Concept</span>
-                </div>
-            </div>
-        </div>`;
-}
-
-function switchColor(key, type, styleId, newColorId, cardId) {
-    const card = document.getElementById(cardId);
-    if (!card) return;
-    const colorObj  = COLORS.find(c => c.id === newColorId);
-    const typeLabel = TYPE_LABELS[type];
-    const newName   = `${PHRASES[key].title} — ${typeLabel} / ${colorObj.label}`;
-    const newImg    = `${key}-${type}-${styleId}-${newColorId}.png`;
-
-    const nameEl = document.getElementById(cardId + '-name');
-    if (nameEl) nameEl.textContent = newName;
-
-    const imgEl = card.querySelector('.card-img');
-    if (imgEl) {
-        imgEl.classList.add('fade-out');
-        setTimeout(() => {
-            imgEl.src = newImg;
-            imgEl.style.display = 'block';
-            const placeholder = card.querySelector('.card-placeholder');
-            if (placeholder) placeholder.style.display = 'none';
-            imgEl.onerror = function () {
-                this.style.display = 'none';
-                if (placeholder) placeholder.style.display = 'block';
-            };
-            imgEl.classList.remove('fade-out');
-        }, 280);
-    }
-
-    card.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-    const activeSwatch = [...card.querySelectorAll('.swatch')].find(s => s.title === colorObj.label);
-    if (activeSwatch) activeSwatch.classList.add('active');
-}
-
-/* ════════ CONTACT ════════ */
-async function handleSubmit(e) {
-    e.preventDefault();
-    const form    = document.getElementById('contact-form');
-    const success = document.getElementById('form-success');
-    const btn     = form.querySelector('.form-submit');
-    btn.textContent = 'Sending...';
-    btn.disabled    = true;
-    try {
-        const res = await fetch(form.action, {
-            method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' },
-        });
-        if (res.ok) { form.style.display = 'none'; success.style.display = 'block'; }
-        else { btn.textContent = 'Try again'; btn.disabled = false; }
-    } catch { btn.textContent = 'Try again'; btn.disabled = false; }
-}
-
-/* ════════ INIT ════════ */
-buildPhraseList();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
