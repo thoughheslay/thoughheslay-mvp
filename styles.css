@@ -421,6 +421,14 @@ a.six-item:hover .six-word.blood-word { color: #a8463f; }
   font-family: var(--body); font-size: clamp(1.05rem, 2vw, 1.25rem);
   color: var(--on-dark-mut); max-width: 42ch; margin: 0 auto;
 }
+.waitlist-done { max-width: 460px; margin: 1.6rem auto 0; text-align: center; }
+.waitlist-done-title {
+  font-family: var(--display); font-weight: 700; font-size: 1.5rem;
+  color: var(--gold); margin-bottom: 0.4rem; line-height: 1.2;
+}
+.waitlist-done-sub {
+  font-family: var(--body); font-size: 1rem; color: var(--on-dark-mut);
+}
 
 /* ============================================================
    SCROLL REVEAL
