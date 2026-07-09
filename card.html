@@ -187,13 +187,17 @@
   .em-acc { color: var(--gold); }
   #stage.accent-blood .em-acc { color: var(--blood-text); }
 
-  /* ~severed word~: the wordmark's cut, applied to type */
-  .cut-word { display: inline-block; position: relative; vertical-align: -0.22em; }
-  .cut-word .cw-t { display: block; overflow: hidden; height: 0.44em; line-height: 1; }
-  .cut-word .cw-b { display: block; overflow: hidden; height: 0.52em; }
-  .cut-word .cw-b > span { display: block; line-height: 1; transform: translateY(-0.44em) skewX(-8deg); transform-origin: 0 0; }
+  /* ~severed word~: the wordmark's cut, applied to type.
+     --cwt/--cwb/--cwl are set per-font at runtime from measured metrics (see tuneCut) */
+  .cut-word { display: inline-block; position: relative; overflow: hidden; vertical-align: -0.24em; }
+  .cut-word .cw-t { display: block; overflow: hidden; height: var(--cwt, 0.6em); line-height: 1; }
+  .cut-word .cw-b { display: block; overflow: hidden; height: var(--cwb, 0.55em); }
+  .cut-word .cw-b > span {
+    display: block; line-height: 1;
+    transform: translateY(calc(-1 * var(--cwt, 0.6em))) skewX(-8deg); transform-origin: 0 0;
+  }
   .cut-word .cw-l {
-    position: absolute; left: -2%; right: -2%; top: 0.42em; height: 0.045em; min-height: 2px;
+    position: absolute; left: 0; right: 0; top: var(--cwl, 0.58em); height: 0.045em; min-height: 2px;
     border-radius: 1px;
     background: linear-gradient(90deg, #6E4F22, #C49A52 30%, #F4E2AC 50%, #C49A52 70%, #714F22);
   }
@@ -287,8 +291,8 @@
   <label><span class="field-name">出处 / 署名</span>
     <input type="text" id="attrIn" placeholder="— Job 13:15">
   </label>
-  <label><span class="field-name">顶部小字</span>
-    <input type="text" id="eyebrowIn" value="FROM THE ASH">
+  <label><span class="field-name">顶部小字（可留空）</span>
+    <input type="text" id="eyebrowIn" placeholder="FROM THE ASH">
   </label>
   <label><span class="field-name">底部小字（logo 下方）</span>
     <input type="text" id="tagIn" placeholder="WEAR WHAT YOU'VE SURVIVED">
@@ -468,6 +472,28 @@
         '<span class="cut-word"><span class="cw-t">$1</span><span class="cw-b"><span>$1</span></span><span class="cw-l"></span></span>');
   }
 
+  /* place the cut from measured font metrics — guessed em values drift per font
+     (Playfair's tall ascenders pushed the seam high and the sliced word low) */
+  function tuneCut() {
+    var q = $('cQuote');
+    if (!q.querySelector('.cut-word')) return;
+    var cs = getComputedStyle(q);
+    var ctx = (tuneCut._c || (tuneCut._c = document.createElement('canvas'))).getContext('2d');
+    ctx.font = (cs.fontStyle === 'italic' ? 'italic ' : '') + cs.fontWeight + ' 100px ' + cs.fontFamily;
+    var m = ctx.measureText('H');
+    var capAsc = (m.actualBoundingBoxAscent || 70) / 100;
+    var fba = (m.fontBoundingBoxAscent || 90) / 100;
+    var fbd = (m.fontBoundingBoxDescent || 25) / 100;
+    // glyph baseline offset inside a line-height:1 box (content area is centered)
+    var baseline = (1 - (fba + fbd)) / 2 + fba;
+    var waist = baseline - capAsc * 0.43; // seam 57% down the cap, like the wordmark
+    q.style.setProperty('--cwt', waist.toFixed(4) + 'em');
+    // 0.24em of descender room below the cut; vertical-align -0.24em cancels it,
+    // so the sliced word's baseline lands exactly on the line's baseline
+    q.style.setProperty('--cwb', (baseline - waist + 0.24).toFixed(4) + 'em');
+    q.style.setProperty('--cwl', (waist - 0.0225).toFixed(4) + 'em');
+  }
+
   /* bake tone/brightness (and the editorial edge fade) into the pixels —
      WebKit drops CSS filters and blend modes when rasterizing the export SVG,
      so the displayed image must already be final */
@@ -556,6 +582,7 @@
 
     bgImg.style.objectPosition = $('posIn').value;
     $('brightVal').textContent = $('brightIn').value;
+    tuneCut();
 
     var s = SIZES[$('ratioIn').value];
     stage.style.width = s[0] + 'px';
@@ -637,6 +664,8 @@
 
   updateRatioLabels();
   render();
+  // font metrics differ once the webfonts land; re-measure the cut then
+  document.fonts.ready.then(render);
 })();
 </script>
 </body>
