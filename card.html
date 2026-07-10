@@ -13,7 +13,9 @@
   :root {
     --char: #16120e; --char-2: #1c1813; --black: #0a0908;
     --gold: #c9a86a; --gold-deep: #8f7338; --gold-dim: #b89c62;
-    --blood: #8a3a34; --blood-text: #ad4c44; --ash: #b3a895;
+    /* -text variants: one step brighter than the brand tones, for type over imagery */
+    --gold-text: #d8bc80;
+    --blood: #8a3a34; --blood-text: #bb5a50; --ash: #b3a895; --ash-text: #c6bcaa;
     --on-dark: #efe9df; --on-dark-mut: #b3a895; --on-dark-faint: #6f6450;
     --hair: rgba(201,168,106,0.16);
     --display: 'Playfair Display', Georgia, serif;
@@ -85,6 +87,8 @@
     width: auto; margin-top: 0.5rem;
   }
   .btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--on-dark); }
+  .preset-row { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; }
+  .preset-row .btn-ghost { flex: 1; margin-top: 0; padding: 0.45em 0.4em; text-align: center; }
   .hint { font-size: 0.72rem; color: var(--on-dark-faint); line-height: 1.5; margin-top: 1rem; }
 
   /* ---------- preview area ---------- */
@@ -130,17 +134,23 @@
   }
   .c-eyebrow {
     font-family: var(--sacred); font-weight: 600; font-size: 27px;
-    letter-spacing: 0.42em; text-transform: uppercase; color: var(--gold-dim);
+    letter-spacing: 0.42em; text-transform: uppercase; color: #c9ad74;
     text-indent: 0.42em; /* re-center letterspaced caps */
     min-height: 1em;
   }
   #stage.accent-blood .c-eyebrow { color: var(--blood-text); }
-  .c-mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; }
+  /* min-height:0 keeps flex from growing this box past the leftover space,
+     which is what lets autoFit detect real overflow */
+  .c-mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 0; }
   .c-quote {
     max-width: 100%; white-space: pre-line; color: #f6f0e5;
     font-family: var(--display); font-weight: 700; line-height: 1.18; letter-spacing: -0.005em;
   }
-  #stage.has-img .c-quote { text-shadow: 0 2px 28px rgba(0,0,0,0.5); }
+  /* over imagery: a tight 1px shadow defines the letter edge, a wide one lifts it off the image */
+  #stage.has-img .c-quote,
+  #stage.has-img .c-attr { text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 4px 26px rgba(0,0,0,0.45); }
+  #stage.has-img .c-eyebrow,
+  #stage.has-img .c-series { text-shadow: 0 1px 2px rgba(0,0,0,0.5), 0 3px 14px rgba(0,0,0,0.4); }
   #stage.style-scripture .c-quote {
     font-family: var(--sacred); font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.07em; line-height: 1.32;
@@ -149,11 +159,15 @@
     font-family: var(--quote); font-style: italic; font-weight: 400;
     line-height: 1.42; letter-spacing: 0.01em;
   }
+  #stage.style-prose .c-quote {
+    font-family: var(--body); font-weight: 400;
+    line-height: 1.52; letter-spacing: 0.005em;
+  }
   .c-rule { width: 1px; height: 64px; margin: 44px auto 30px; background: linear-gradient(var(--gold-deep), transparent); }
   #stage.accent-blood .c-rule { background: linear-gradient(var(--blood), transparent); }
   .c-attr {
     font-family: var(--quote); font-style: italic; font-size: 34px;
-    color: var(--gold); letter-spacing: 0.02em;
+    color: var(--gold-text); letter-spacing: 0.02em;
   }
   #stage.accent-blood .c-attr { color: var(--blood-text); }
   .brand-full svg { display: block; width: 216px; height: auto; margin: 0 auto; opacity: 0.92; color: #ECE5D7; }
@@ -179,17 +193,22 @@
   .c-series {
     position: absolute; top: 96px; right: 90px;
     font-family: var(--sacred); font-weight: 600; font-size: 24px;
-    letter-spacing: 0.2em; color: var(--gold-dim); opacity: 0.75;
+    letter-spacing: 0.2em; color: #c9ad74; opacity: 0.75;
   }
 
   /* inline emphasis: *italic* and **accent** */
   .c-quote em { font-style: italic; }
-  .em-acc { color: var(--gold); }
+  .em-acc { color: var(--gold-text); }
   #stage.accent-blood .em-acc { color: var(--blood-text); }
 
   /* ~severed word~: the wordmark's cut, applied to type.
      --cwt/--cwb/--cwl are set per-font at runtime from measured metrics (see tuneCut) */
-  .cut-word { display: inline-block; position: relative; overflow: hidden; vertical-align: -0.24em; }
+  /* side padding (offset by negative margins) gives the skewed lower half room
+     inside the overflow clip; without it the slice's left edge gets shaved off */
+  .cut-word {
+    display: inline-block; position: relative; overflow: hidden;
+    vertical-align: -0.24em; padding: 0 0.15em; margin: 0 -0.15em;
+  }
   .cut-word .cw-t { display: block; overflow: hidden; height: var(--cwt, 0.6em); line-height: 1; }
   .cut-word .cw-b { display: block; overflow: hidden; height: var(--cwb, 0.55em); }
   .cut-word .cw-b > span {
@@ -204,10 +223,10 @@
 
   /* ash accent: the third tone — lament, between blood and gold */
   #stage.accent-ash .bg-base { background: radial-gradient(120% 90% at 50% 40%, #191713, #0c0b09 75%); }
-  #stage.accent-ash .c-eyebrow, #stage.accent-ash .c-series { color: #a49a88; }
-  #stage.accent-ash .c-attr { color: var(--ash); }
+  #stage.accent-ash .c-eyebrow, #stage.accent-ash .c-series { color: #b6ac9a; }
+  #stage.accent-ash .c-attr { color: var(--ash-text); }
   #stage.accent-ash .c-rule { background: linear-gradient(#8f8674, transparent); }
-  #stage.accent-ash .em-acc { color: var(--ash); }
+  #stage.accent-ash .em-acc { color: var(--ash-text); }
 
   /* ---------- editorial layout: text top-left, image lower-right ---------- */
   #stage.layout-editorial .content { align-items: flex-start; text-align: left; }
@@ -232,6 +251,7 @@
   #stage.bg-paper .bg-base { background: radial-gradient(120% 90% at 50% 40%, #f4efe5, #e6dfd0 75%); }
   #stage.bg-paper .grain { background-image: radial-gradient(rgba(90,70,40,0.05) 0.5px, transparent 0.5px); }
   #stage.bg-paper .c-quote { color: #221d17; text-shadow: none; }
+  #stage.bg-paper .c-attr, #stage.bg-paper .c-eyebrow, #stage.bg-paper .c-series { text-shadow: none; }
   #stage.bg-paper .c-eyebrow, #stage.bg-paper .c-series,
   #stage.bg-paper .c-attr, #stage.bg-paper .em-acc { color: var(--gold-deep); }
   #stage.bg-paper.accent-blood .c-eyebrow, #stage.bg-paper.accent-blood .c-series,
@@ -285,6 +305,13 @@
 <aside class="panel">
   <h1>THSM · 文字卡片</h1>
 
+  <div class="preset-row">
+    <button class="btn btn-ghost preset" type="button" data-preset="declare">宣言</button>
+    <button class="btn btn-ghost preset" type="button" data-preset="comfort">安慰</button>
+    <button class="btn btn-ghost preset" type="button" data-preset="scripture">经文</button>
+    <button class="btn btn-ghost preset" type="button" data-preset="paperq">纸面引文</button>
+  </div>
+
   <label><span class="field-name">文字（回车换行 · *斜体* · **强调色** · ~切断~）</span>
     <textarea id="quoteIn" rows="5">Words have weight. Real weight.</textarea>
   </label>
@@ -335,6 +362,7 @@
         <option value="declaration">宣言 · Playfair</option>
         <option value="scripture">经文 · Cinzel</option>
         <option value="citation">引语 · IM Fell 斜体</option>
+        <option value="prose">正文 · EB Garamond</option>
       </select>
     </label>
     <label><span class="field-name">强调色</span>
@@ -346,7 +374,7 @@
     </label>
   </div>
 
-  <label><span class="field-name">字号 · <span id="fontVal">76</span></span>
+  <label><span class="field-name">字号上限 · <span id="fontVal">76</span>（放不下会自动缩小）</span>
     <input type="range" id="fontIn" min="44" max="130" value="76">
   </label>
   <label><span class="field-name">尺寸</span>
@@ -367,6 +395,20 @@
 
   <fieldset>
     <legend>背景图</legend>
+    <label><span class="field-name">素材库（公版画作）</span>
+      <select id="plateIn">
+        <option value="">— 无 / 自己上传 —</option>
+        <option value="job-hears.jpg">约伯闻噩耗 · Doré</option>
+        <option value="job-friends.jpg">约伯与三友 · Doré</option>
+        <option value="jacob-wrestles.jpg">雅各摔跤 · Doré</option>
+        <option value="dry-bones.jpg">枯骨谷 · Doré</option>
+        <option value="jesus-wept.jpg">耶稣哭了 · Tissot</option>
+        <option value="augustine.jpg">奥古斯丁 · Champaigne</option>
+        <option value="calvin.jpg">加尔文</option>
+        <option value="luther.jpg">路德 · Cranach</option>
+        <option value="spurgeon.jpg">司布真 · Melville</option>
+      </select>
+    </label>
     <div class="field">
       <input type="file" id="imgIn" accept="image/*">
       <button class="btn btn-ghost" id="imgClear" type="button">清除背景图</button>
@@ -391,6 +433,10 @@
   </fieldset>
 
   <button class="btn" id="exportBtn" type="button">导出 PNG</button>
+  <div class="preset-row" style="margin-top: 0.7rem;">
+    <button class="btn btn-ghost" id="exportAllBtn" type="button">导出全部尺寸</button>
+    <button class="btn btn-ghost" id="pinBtn" type="button">复制 Pin 描述</button>
+  </div>
   <p class="hint">内部工具，不要链接到线上页面。需要联网（加载字体与导出库）。人物版画 / 圣经场景素描可在 Wikimedia Commons、大都会博物馆 Open Access、荷兰国立博物馆 Rijksstudio 找公版图。</p>
 </aside>
 
@@ -582,12 +628,67 @@
 
     bgImg.style.objectPosition = $('posIn').value;
     $('brightVal').textContent = $('brightIn').value;
-    tuneCut();
 
     var s = SIZES[$('ratioIn').value];
     stage.style.width = s[0] + 'px';
     stage.style.height = s[1] + 'px';
+    autoFit();
+    tuneCut();
     fit();
+    saveState();
+  }
+
+  /* the size slider sets the ceiling; long quotes shrink until they fit.
+     scrollHeight misses content that centered flex pushes above the box,
+     so overflow is measured from the children's actual bounds */
+  function midOverflow() {
+    var mid = document.querySelector('.c-mid');
+    var top = Infinity, bot = -Infinity;
+    Array.prototype.forEach.call(mid.children, function (k) {
+      var r = k.getBoundingClientRect();
+      if (!r.height) return;
+      if (r.top < top) top = r.top;
+      if (r.bottom > bot) bot = r.bottom;
+    });
+    if (bot <= top) return false;
+    return (bot - top) > mid.getBoundingClientRect().height + 2;
+  }
+  function autoFit() {
+    var q = $('cQuote');
+    var size = parseInt($('fontIn').value, 10);
+    q.style.fontSize = size + 'px';
+    var guard = 0;
+    while (guard++ < 40 && size > 26 && midOverflow()) {
+      size -= 4;
+      q.style.fontSize = size + 'px';
+    }
+  }
+
+  /* ---------- presets & persistence ---------- */
+  var PRESETS = {
+    declare:   { layoutIn: 'center',    styleIn: 'declaration', accentIn: 'gold', bgIn: 'dark' },
+    comfort:   { layoutIn: 'editorial', styleIn: 'prose',       accentIn: 'ash',  bgIn: 'dark' },
+    scripture: { layoutIn: 'center',    styleIn: 'scripture',   accentIn: 'gold', bgIn: 'dark' },
+    paperq:    { layoutIn: 'center',    styleIn: 'prose',       accentIn: 'gold', bgIn: 'paper' }
+  };
+
+  var CTRLS = ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn',
+    'toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','plateIn'];
+
+  function saveState() {
+    var st = {};
+    CTRLS.forEach(function (id) { var el = $(id); st[id] = el.type === 'checkbox' ? el.checked : el.value; });
+    try { localStorage.setItem('thsmCard', JSON.stringify(st)); } catch (e) {}
+  }
+
+  function loadState() {
+    var st;
+    try { st = JSON.parse(localStorage.getItem('thsmCard') || '{}'); } catch (e) { st = {}; }
+    CTRLS.forEach(function (id) {
+      if (!(id in st)) return;
+      var el = $(id);
+      if (el.type === 'checkbox') el.checked = !!st[id]; else el.value = st[id];
+    });
   }
 
   function fit() {
@@ -599,7 +700,7 @@
     $('scaler').style.height = s[1] * scale + 'px';
   }
 
-  ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn']
+  ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn','toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn']
     .forEach(function (id) { $(id).addEventListener('input', render); });
   // these change how the image pixels are baked
   ['toneIn','accentIn','layoutIn','bgIn'].forEach(function (id) { $(id).addEventListener('input', processBg); });
@@ -607,9 +708,31 @@
   $('scaleIn').addEventListener('input', updateRatioLabels);
   window.addEventListener('resize', fit);
 
+  document.querySelectorAll('.preset').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var p = PRESETS[b.getAttribute('data-preset')];
+      Object.keys(p).forEach(function (k) { $(k).value = p[k]; });
+      processBg();
+      render();
+    });
+  });
+
+  function loadPlate(name, silent) {
+    var im = new Image();
+    im.onload = function () { rawImg = im; processBg(); render(); };
+    im.onerror = function () { if (!silent) alert('素材加载失败'); };
+    im.src = 'plates/' + name;
+  }
+  $('plateIn').addEventListener('input', function () {
+    if (!this.value) { rawImg = null; bgImg.src = BLANK; render(); return; }
+    $('imgIn').value = '';
+    loadPlate(this.value);
+  });
+
   $('imgIn').addEventListener('change', function () {
     var f = this.files && this.files[0];
     if (!f) return;
+    $('plateIn').value = '';
     var r = new FileReader();
     r.onload = function () {
       var im = new Image();
@@ -622,14 +745,15 @@
     rawImg = null;
     bgImg.src = BLANK;
     $('imgIn').value = '';
+    $('plateIn').value = '';
     render();
   });
 
-  $('exportBtn').addEventListener('click', function () {
-    var btn = this;
-    btn.disabled = true; btn.textContent = '生成中…';
-    var s = SIZES[$('ratioIn').value];
-    var scale = parseInt($('scaleIn').value, 10) || 1;
+  /* blob + object URL: data-URL downloads are unreliable on mobile Safari.
+     WebKit rasterizes the export SVG before its resources finish loading,
+     so warm-up passes are needed there; only the last result is kept */
+  function makeBlob(sizeKey, scale) {
+    var s = SIZES[sizeKey];
     var opts = {
       width: s[0], height: s[1], pixelRatio: scale,
       style: { transform: 'none' },
@@ -637,24 +761,33 @@
         return !(node.classList && node.classList.contains('safe-overlay'));
       },
     };
+    var p = htmlToImage.toBlob(stage, opts);
+    if (WEBKIT) {
+      p = p.then(function () { return htmlToImage.toBlob(stage, opts); })
+           .then(function () { return htmlToImage.toBlob(stage, opts); });
+    }
+    return p;
+  }
+
+  function download(blob, name) {
+    var a = document.createElement('a');
+    a.download = name;
+    a.href = URL.createObjectURL(blob);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+  }
+
+  $('exportBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true; btn.textContent = '生成中…';
+    var key = $('ratioIn').value;
+    var scale = parseInt($('scaleIn').value, 10) || 1;
     document.fonts.ready.then(function () {
-      // blob + object URL: data-URL downloads are unreliable on mobile Safari.
-      // WebKit rasterizes the export SVG before its resources finish loading,
-      // so warm-up passes are needed there; only the last result is kept
-      var p = htmlToImage.toBlob(stage, opts);
-      if (WEBKIT) {
-        p = p.then(function () { return htmlToImage.toBlob(stage, opts); })
-             .then(function () { return htmlToImage.toBlob(stage, opts); });
-      }
-      return p;
+      return makeBlob(key, scale);
     }).then(function (blob) {
-      var a = document.createElement('a');
-      a.download = 'thsm-card-' + (s[0] * scale) + 'w-' + Date.now() + '.png';
-      a.href = URL.createObjectURL(blob);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+      download(blob, 'thsm-card-' + (SIZES[key][0] * scale) + 'w-' + Date.now() + '.png');
     }).catch(function (err) {
       alert('导出失败：' + err);
     }).finally(function () {
@@ -662,7 +795,61 @@
     });
   });
 
+  $('exportAllBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    var scale = parseInt($('scaleIn').value, 10) || 1;
+    var orig = $('ratioIn').value;
+    var keys = ['post', 'story', 'pin'];
+    var stamp = Date.now();
+    document.fonts.ready.then(function () {
+      return keys.reduce(function (chain, key, i) {
+        return chain.then(function () {
+          btn.textContent = '生成中 ' + (i + 1) + '/' + keys.length + '…';
+          $('ratioIn').value = key;
+          render();
+          return makeBlob(key, scale).then(function (blob) {
+            download(blob, 'thsm-' + key + '-' + (SIZES[key][0] * scale) + 'w-' + stamp + '.png');
+            // pause between downloads so the browser doesn't swallow them
+            return new Promise(function (r) { setTimeout(r, 500); });
+          });
+        });
+      }, Promise.resolve());
+    }).catch(function (err) {
+      alert('导出失败：' + err);
+    }).finally(function () {
+      $('ratioIn').value = orig;
+      render();
+      btn.disabled = false; btn.textContent = '导出全部尺寸';
+    });
+  });
+
+  /* attribution lives in the Pin's description, not in the pixels */
+  $('pinBtn').addEventListener('click', function () {
+    var btn = this;
+    var quote = $('quoteIn').value.replace(/\*\*?|~/g, '').trim();
+    var attr = $('attrIn').value.trim();
+    var text = '“' + quote + '”' + (attr ? ' ' + attr : '') +
+      '\n\nThough He Slay Me — wear what you’ve survived.' +
+      '\nthoughheslayme.com · @ThoughHeSlayMeWear';
+    function done() {
+      btn.textContent = '已复制';
+      setTimeout(function () { btn.textContent = '复制 Pin 描述'; }, 1600);
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败'); }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  });
+
+  loadState();
   updateRatioLabels();
+  if ($('plateIn').value) loadPlate($('plateIn').value, true);
   render();
   // font metrics differ once the webfonts land; re-measure the cut then
   document.fonts.ready.then(render);
