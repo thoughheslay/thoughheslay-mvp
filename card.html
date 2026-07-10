@@ -15,7 +15,7 @@
     --gold: #c9a86a; --gold-deep: #8f7338; --gold-dim: #b89c62;
     /* -text variants: one step brighter than the brand tones, for type over imagery */
     --gold-text: #d8bc80;
-    --blood: #8a3a34; --blood-text: #bb5a50; --ash: #b3a895; --ash-text: #c6bcaa;
+    --blood: #8a3a34; --blood-text: #d65c4d; --ash: #b3a895; --ash-text: #c6bcaa;
     --on-dark: #efe9df; --on-dark-mut: #b3a895; --on-dark-faint: #6f6450;
     --hair: rgba(201,168,106,0.16);
     --display: 'Playfair Display', Georgia, serif;
@@ -203,20 +203,23 @@
 
   /* ~severed word~: the wordmark's cut, applied to type.
      --cwt/--cwb/--cwl are set per-font at runtime from measured metrics (see tuneCut) */
-  /* side padding (offset by negative margins) gives the skewed lower half room
-     inside the overflow clip; without it the slice's left edge gets shaved off */
+  /* every box that clips (outer AND both slices) needs side padding offset by
+     negative margins: overflow clips at the padding edge, so this widens the
+     clip region without moving the text. 0.35em covers the skew shift plus
+     italic overhang at the first glyph */
   .cut-word {
     display: inline-block; position: relative; overflow: hidden;
-    vertical-align: -0.24em; padding: 0 0.15em; margin: 0 -0.15em;
+    vertical-align: -0.24em; padding: 0 0.35em; margin: 0 -0.35em;
   }
   .cut-word .cw-t { display: block; overflow: hidden; height: var(--cwt, 0.6em); line-height: 1; }
   .cut-word .cw-b { display: block; overflow: hidden; height: var(--cwb, 0.55em); }
+  .cut-word .cw-t, .cut-word .cw-b { padding: 0 0.35em; margin: 0 -0.35em; }
   .cut-word .cw-b > span {
     display: block; line-height: 1;
     transform: translateY(calc(-1 * var(--cwt, 0.6em))) skewX(-8deg); transform-origin: 0 0;
   }
   .cut-word .cw-l {
-    position: absolute; left: 0; right: 0; top: var(--cwl, 0.58em); height: 0.045em; min-height: 2px;
+    position: absolute; left: 0.15em; right: 0.15em; top: var(--cwl, 0.58em); height: 0.045em; min-height: 2px;
     border-radius: 1px;
     background: linear-gradient(90deg, #6E4F22, #C49A52 30%, #F4E2AC 50%, #C49A52 70%, #714F22);
   }
