@@ -226,17 +226,45 @@
   }
 
   /* ---------- motion: rasterization passes & preview canvas ----------
-     each pass isolates one layer; visibility (not display) keeps layout identical */
+     each pass isolates one layer. Only siblings are ever hidden and text is
+     blanked via glyph fill — a visibility:visible override under a hidden
+     ancestor gets dropped by WebKit's foreignObject rasterizer */
   #stage.ras-bg .content { visibility: hidden; }
   #stage.ras-nobg .bg-base, #stage.ras-nobg .bg-img,
   #stage.ras-nobg .vignette, #stage.ras-nobg .grain { visibility: hidden; }
-  #stage.ras-text .cut-word { visibility: hidden; }
-  #stage.ras-top .content { visibility: hidden; }
-  #stage.ras-top .cw-t { visibility: visible; }
-  #stage.ras-bot .content { visibility: hidden; }
-  #stage.ras-bot .cw-b { visibility: visible; }
+  /* chrome = eyebrow / series / brand block, shown with the first beat */
+  #stage.ras-chrome .c-quote { -webkit-text-fill-color: transparent; }
+  #stage.ras-chrome .cut-word, #stage.ras-chrome .c-rule, #stage.ras-chrome .c-attr { visibility: hidden; }
+  /* attribution + rule, shown with the last beat */
+  #stage.ras-attr .c-quote { -webkit-text-fill-color: transparent; }
+  #stage.ras-attr .cut-word, #stage.ras-attr .c-eyebrow,
+  #stage.ras-attr .c-series, #stage.ras-attr .c-brand { visibility: hidden; }
+  /* beat passes: per-beat glyph fill is set inline by buildLayers */
+  #stage.ras-beats .c-eyebrow, #stage.ras-beats .c-series, #stage.ras-beats .c-rule,
+  #stage.ras-beats .c-attr, #stage.ras-beats .c-brand { visibility: hidden; }
+  /* severed-word slice passes */
+  #stage.ras-slice .c-eyebrow, #stage.ras-slice .c-series, #stage.ras-slice .c-rule,
+  #stage.ras-slice .c-attr, #stage.ras-slice .c-brand { visibility: hidden; }
+  #stage.ras-slice .c-quote { -webkit-text-fill-color: transparent; }
+  #stage.ras-top .cw-b, #stage.ras-top .cw-l { visibility: hidden; }
+  #stage.ras-top .cw-t, #stage.ras-top .cw-t * { -webkit-text-fill-color: currentColor; }
+  #stage.ras-bot .cw-t, #stage.ras-bot .cw-l { visibility: hidden; }
+  #stage.ras-bot .cw-b, #stage.ras-bot .cw-b * { -webkit-text-fill-color: currentColor; }
   /* skew is re-applied progressively on canvas, so the raster is upright */
   #stage.no-skew .cw-b > span { transform: translateY(calc(-1 * var(--cwt, 0.6em))); }
+
+  /* fire anchor marker (preview only) */
+  #fireMark {
+    position: absolute; width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--gold); transform: translate(-50%, -50%);
+    pointer-events: none; opacity: 0; z-index: 6;
+  }
+  #fireMark.pulse { animation: firemark 1.2s ease-out; }
+  @keyframes firemark {
+    0% { opacity: 0; }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+  }
 
   #scaler { position: relative; }
   #motionCanvas {
@@ -336,7 +364,7 @@
     <button class="btn btn-ghost preset" type="button" data-preset="paperq">纸面引文</button>
   </div>
 
-  <label><span class="field-name">文字（回车换行 · *斜体* · **强调色** · ~切断~）</span>
+  <label><span class="field-name">文字（*斜体* · **强调色** · ~切断~ · |分镜）</span>
     <textarea id="quoteIn" rows="5">Words have weight. Real weight.</textarea>
   </label>
   <label><span class="field-name">出处 / 署名</span>
@@ -459,21 +487,20 @@
   <fieldset>
     <legend>动效（导出 MP4）</legend>
     <div class="row">
-      <label><span class="field-name">编排</span>
-        <select id="motionIn">
-          <option value="sever">切开金线</option>
-          <option value="fade">浮现</option>
-        </select>
-      </label>
       <label><span class="field-name">火焰</span>
         <select id="fireIn">
           <option value="none">无</option>
-          <option value="mid">中下</option>
-          <option value="left">左下</option>
-          <option value="right">右下</option>
+          <option value="on">点燃（点击画面定位）</option>
         </select>
       </label>
+      <label><span class="field-name">火焰规模 · <span id="fireScaleVal">100</span>%</span>
+        <input type="range" id="fireScaleIn" min="40" max="200" value="100">
+      </label>
     </div>
+    <div class="preset-row">
+      <button class="btn btn-ghost" id="fireAutoBtn" type="button">自动寻找亮部</button>
+    </div>
+    <label><span class="field-name"><input type="checkbox" id="shimmerIn" checked> 热浪扭曲（画中火焰随之摇曳）</span></label>
     <label><span class="field-name">时长 · <span id="durVal">8</span> 秒</span>
       <input type="range" id="durIn" min="4" max="15" value="8">
     </label>
@@ -649,7 +676,11 @@
   }
 
   function render() {
-    $('cQuote').innerHTML = fmt($('quoteIn').value);
+    // | splits the quote into sequential beats for the motion timeline;
+    // static layout is identical — beats are unstyled inline spans
+    $('cQuote').innerHTML = $('quoteIn').value.split('|').map(function (sg, i) {
+      return '<span class="beat" data-beat="' + i + '">' + fmt(sg.trim()) + '</span>';
+    }).join(' ');
     $('cQuote').style.fontSize = $('fontIn').value + 'px';
     $('fontVal').textContent = $('fontIn').value;
 
@@ -688,6 +719,7 @@
     tuneCut();
     fit();
     $('durVal').textContent = $('durIn').value;
+    $('fireScaleVal').textContent = $('fireScaleIn').value;
     motion.layers = null; // card changed — rasterized layers are stale
     saveState();
   }
@@ -728,10 +760,10 @@
 
   var CTRLS = ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn',
     'toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','plateIn',
-    'motionIn','fireIn','durIn','kbIn'];
+    'fireIn','fireScaleIn','shimmerIn','durIn','kbIn'];
 
   function saveState() {
-    var st = {};
+    var st = { fireAnchor: fireAnchor };
     CTRLS.forEach(function (id) { var el = $(id); st[id] = el.type === 'checkbox' ? el.checked : el.value; });
     try { localStorage.setItem('thsmCard', JSON.stringify(st)); } catch (e) {}
   }
@@ -739,10 +771,14 @@
   function loadState() {
     var st;
     try { st = JSON.parse(localStorage.getItem('thsmCard') || '{}'); } catch (e) { st = {}; }
+    if (st.fireAnchor && typeof st.fireAnchor.x === 'number') fireAnchor = st.fireAnchor;
     CTRLS.forEach(function (id) {
       if (!(id in st)) return;
       var el = $(id);
+      if (!el) return;
       if (el.type === 'checkbox') el.checked = !!st[id]; else el.value = st[id];
+      // stored value from an older option set — fall back to the first option
+      if (el.tagName === 'SELECT' && el.selectedIndex === -1) el.selectedIndex = 0;
     });
   }
 
@@ -755,7 +791,7 @@
     $('scaler').style.height = s[1] * scale + 'px';
   }
 
-  ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn','toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','motionIn','fireIn','durIn','kbIn']
+  ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn','toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','fireIn','fireScaleIn','shimmerIn','durIn','kbIn']
     .forEach(function (id) { $(id).addEventListener('input', render); });
   // these change how the image pixels are baked
   ['toneIn','accentIn','layoutIn','bgIn'].forEach(function (id) { $(id).addEventListener('input', processBg); });
@@ -841,36 +877,53 @@
      composite of those bitmaps, so preview and export match
      ============================================================ */
   var motion = { layers: null, playing: false };
+  var fireAnchor = { x: 0.5, y: 0.72 };
 
   function motionParams() {
     return {
-      mode: $('motionIn').value,
-      fire: $('fireIn').value,
+      fire: $('fireIn').value === 'on' ? 'on' : 'none',
+      fireScale: (parseInt($('fireScaleIn').value, 10) || 100) / 100,
+      shimmer: $('shimmerIn').checked,
+      anchor: fireAnchor,
       dur: parseInt($('durIn').value, 10) || 8,
       kb: $('kbIn').checked,
       size: SIZES[$('ratioIn').value],
     };
   }
 
-  function snapLayer(classes) {
+  /* prep() applies temporary inline styles for a pass and returns an undo fn */
+  function snapLayer(classes, prep) {
     var prev = stage.className;
     stage.className = prev + ' ' + classes;
+    var undo = prep ? prep() : null;
+    function restore() { stage.className = prev; if (undo) undo(); }
     var s = SIZES[$('ratioIn').value];
     return htmlToImage.toCanvas(stage, {
       width: s[0], height: s[1], pixelRatio: 1,
       style: { transform: 'none' },
       filter: function (node) { return !(node.classList && node.classList.contains('safe-overlay')); },
     }).then(
-      function (c) { stage.className = prev; return c; },
-      function (e) { stage.className = prev; throw e; }
+      function (c) { restore(); return c; },
+      function (e) { restore(); throw e; }
     );
+  }
+
+  /* hide severed words that don't belong in this pass; keepEl stays visible */
+  function hideCuts(keepEl) {
+    var cuts = Array.prototype.slice.call(document.querySelectorAll('.cut-word'));
+    var touched = [];
+    cuts.forEach(function (c) {
+      if (c !== keepEl) { c.style.visibility = 'hidden'; touched.push(c); }
+    });
+    return function () { touched.forEach(function (c) { c.style.visibility = ''; }); };
   }
 
   function buildLayers() {
     if (motion.layers) return Promise.resolve(motion.layers);
-    var hasCut = !!document.querySelector('.cut-word');
-    var out = { hasCut: hasCut, seam: null, pivotY: 0 };
-    if (hasCut) {
+    var beatsEls = Array.prototype.slice.call(document.querySelectorAll('.beat'));
+    var cutEl = document.querySelector('.cut-word'); // first severed word is the animated one
+    var out = { beats: [], chrome: null, attr: null, top: null, bot: null, seam: null, pivotY: 0, cutBeat: -1 };
+    if (cutEl) {
       var sr = stage.getBoundingClientRect();
       var k = sr.width / stage.offsetWidth;
       var lr = document.querySelector('.cw-l').getBoundingClientRect();
@@ -879,19 +932,75 @@
         w: lr.width / k, h: Math.max(2, lr.height / k),
       };
       out.pivotY = out.seam.y + out.seam.h / 2;
+      for (var b = 0; b < beatsEls.length; b++) {
+        if (beatsEls[b].contains(cutEl)) { out.cutBeat = b; break; }
+      }
     }
     var chain = document.fonts.ready;
     if (WEBKIT) chain = chain.then(function () { return snapLayer('ras-bg'); }); // warm-up pass
-    return chain
+    chain = chain
       .then(function () { return snapLayer('ras-bg'); }).then(function (c) { out.bg = c; })
-      .then(function () { return snapLayer('ras-nobg ras-text'); }).then(function (c) { out.text = c; })
+      .then(function () { return snapLayer('ras-nobg ras-chrome'); }).then(function (c) { out.chrome = c; })
       .then(function () {
-        if (!hasCut) return null;
-        return snapLayer('ras-nobg ras-top').then(function (c) { out.top = c; })
-          .then(function () { return snapLayer('ras-nobg ras-bot no-skew'); })
-          .then(function (c) { out.bot = c; });
-      })
-      .then(function () { motion.layers = out; return out; });
+        if (!$('attrIn').value.trim()) return null;
+        return snapLayer('ras-nobg ras-attr').then(function (c) { out.attr = c; });
+      });
+    beatsEls.forEach(function (el, bi) {
+      chain = chain.then(function () {
+        // skip beats with no glyphs of their own (e.g. a beat that is only the severed word)
+        var probe = el.cloneNode(true);
+        var pc = probe.querySelector('.cut-word');
+        if (pc) pc.parentNode.removeChild(pc);
+        if (!probe.textContent.replace(/\s+/g, '')) { out.beats[bi] = null; return null; }
+        return snapLayer('ras-nobg ras-beats', function () {
+          // only this beat's glyphs keep their fill
+          beatsEls.forEach(function (e2, j) {
+            e2.style.webkitTextFillColor = j === bi ? '' : 'transparent';
+          });
+          // the animated word renders via its slice layers; severed words in
+          // other beats must not leak their seam bars into this layer
+          var touched = [];
+          Array.prototype.forEach.call(document.querySelectorAll('.cut-word'), function (c) {
+            if (c === cutEl || !el.contains(c)) { c.style.visibility = 'hidden'; touched.push(c); }
+          });
+          return function () {
+            beatsEls.forEach(function (e2) { e2.style.webkitTextFillColor = ''; });
+            touched.forEach(function (c) { c.style.visibility = ''; });
+          };
+        }).then(function (c) { out.beats[bi] = c; });
+      });
+    });
+    if (cutEl) {
+      chain = chain
+        .then(function () {
+          return snapLayer('ras-nobg ras-slice ras-top', function () { return hideCuts(cutEl); });
+        }).then(function (c) { out.top = c; })
+        .then(function () {
+          return snapLayer('ras-nobg ras-slice ras-bot no-skew', function () { return hideCuts(cutEl); });
+        }).then(function (c) { out.bot = c; });
+    }
+    return chain.then(function () {
+      out.timeline = buildTimeline(out);
+      motion.layers = out;
+      return out;
+    });
+  }
+
+  /* beats play in sequence; the beat carrying the severed word gets extra room */
+  function buildTimeline(L) {
+    var n = Math.max(1, L.beats.length);
+    var weights = [], total = 0, i;
+    for (i = 0; i < n; i++) {
+      weights[i] = 1 + (i === L.cutBeat ? 1.5 : 0);
+      total += weights[i];
+    }
+    var usable = 0.86, pos = 0, tl = [];
+    for (i = 0; i < n; i++) {
+      var len = usable * weights[i] / total;
+      tl.push({ start: pos, end: pos + len, cut: i === L.cutBeat });
+      pos += len;
+    }
+    return tl;
   }
 
   function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
@@ -899,14 +1008,38 @@
   /* deterministic pseudo-random so every export renders identical frames */
   function rnd(i, j) { var x = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return x - Math.floor(x); }
 
-  var FIRE_X = { mid: 0.5, left: 0.28, right: 0.72 };
+  /* heat haze: sinusoidally displace thin strips of the already-drawn frame
+     above the anchor, so the engraving's own flame lines waver */
+  function drawShimmer(ctx, W, H, ts, p) {
+    var ax = W * p.anchor.x, ay = H * p.anchor.y;
+    var s = p.fireScale;
+    var rw = Math.round(W * 0.3 * s);
+    var x0 = Math.max(0, Math.round(ax - rw / 2));
+    var y0 = Math.max(0, Math.round(ay - H * 0.3 * s));
+    var w = Math.min(W - x0, rw);
+    var h = Math.min(H - y0, Math.round(ay - y0));
+    if (w < 8 || h < 8) return;
+    var tmp = drawShimmer._c || (drawShimmer._c = document.createElement('canvas'));
+    if (tmp.width !== w || tmp.height !== h) { tmp.width = w; tmp.height = h; }
+    var tc = tmp.getContext('2d');
+    tc.clearRect(0, 0, w, h);
+    tc.drawImage(ctx.canvas, x0, y0, w, h, 0, 0, w, h);
+    var strip = 4;
+    for (var y = 0; y < h; y += strip) {
+      var depth = y / h; // wobble grows toward the flame base
+      var amp = (2 + 4 * depth) * (W / 1080) * s;
+      var dx = Math.sin(ts * 7 + y * 0.045) * amp * depth +
+               Math.sin(ts * 13 + y * 0.02 + 2) * amp * 0.5 * depth;
+      ctx.drawImage(tmp, 0, y, w, strip, x0 + dx, y0 + y, w, strip);
+    }
+  }
 
-  function drawFire(ctx, W, H, ts, anchor) {
-    var x0 = W * FIRE_X[anchor];
-    var yBase = H * 0.8;
-    var span = W * 0.16;
-    var rise = H * 0.34;
-    var u = W / 1080;
+  function drawFire(ctx, W, H, ts, p) {
+    var x0 = W * p.anchor.x;
+    var yBase = H * p.anchor.y;
+    var span = W * 0.16 * p.fireScale;
+    var rise = H * 0.34 * p.fireScale;
+    var u = (W / 1080) * p.fireScale;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     // breathing ambient glow
@@ -996,32 +1129,38 @@
     } else {
       ctx.drawImage(L.bg, 0, 0);
     }
-    if (p.fire !== 'none') drawFire(ctx, W, H, ts, p.fire);
-    var mode = (p.mode === 'sever' && L.hasCut) ? 'sever' : 'fade';
-    if (mode === 'fade') {
-      // everything rises out of the dark in its final (already severed) state
-      var a = ease(phase(t, 0.04, 0.34));
-      ctx.save();
-      ctx.globalAlpha = a;
-      ctx.translate(0, (1 - a) * H * 0.02);
-      ctx.drawImage(L.text, 0, 0);
-      if (L.hasCut) {
+    if (p.fire === 'on') {
+      if (p.shimmer) drawShimmer(ctx, W, H, ts, p);
+      drawFire(ctx, W, H, ts, p);
+    }
+    // beats enter in sequence; chrome joins the first, attribution the last
+    var tl = L.timeline;
+    for (var i = 0; i < tl.length; i++) {
+      var seg = tl[i];
+      var lt = phase(t, seg.start, seg.end);
+      if (lt <= 0) continue;
+      var last = i === tl.length - 1;
+      if (!seg.cut) {
+        var a = ease(phase(lt, 0, 0.5));
+        ctx.save();
+        ctx.globalAlpha = a;
+        if (L.beats[i]) ctx.drawImage(L.beats[i], 0, 0);
+        if (i === 0 && L.chrome) ctx.drawImage(L.chrome, 0, 0);
+        if (last && L.attr) ctx.drawImage(L.attr, 0, 0);
+        ctx.restore();
+      } else {
+        // the word appears whole, the line cuts it, the lower half gives way
+        var af = ease(phase(lt, 0, 0.3));
+        ctx.save();
+        ctx.globalAlpha = af;
+        if (L.beats[i]) ctx.drawImage(L.beats[i], 0, 0);
+        if (i === 0 && L.chrome) ctx.drawImage(L.chrome, 0, 0);
+        if (last && L.attr) ctx.drawImage(L.attr, 0, 0);
         ctx.drawImage(L.top, 0, 0);
-        drawSkewed(ctx, L.bot, L.pivotY, 1);
-        drawSeam(ctx, L.seam, 1);
+        drawSkewed(ctx, L.bot, L.pivotY, ease(phase(lt, 0.72, 1)));
+        ctx.restore();
+        drawSeam(ctx, L.seam, ease(phase(lt, 0.32, 0.7)), af, true);
       }
-      ctx.restore();
-    } else {
-      // the word appears whole, the line cuts it, the lower half gives way
-      var a2 = ease(phase(t, 0.03, 0.18));
-      var sk = ease(phase(t, 0.55, 0.8));
-      ctx.save();
-      ctx.globalAlpha = a2;
-      ctx.drawImage(L.text, 0, 0);
-      ctx.drawImage(L.top, 0, 0);
-      drawSkewed(ctx, L.bot, L.pivotY, sk);
-      ctx.restore();
-      drawSeam(ctx, L.seam, ease(phase(t, 0.2, 0.55)), a2, true);
     }
   }
 
@@ -1069,6 +1208,14 @@
     });
   });
 
+  /* MessageChannel scheduling isn't throttled in background tabs the way
+     setTimeout is, so an export keeps encoding if the user switches away */
+  function nextTick(cb) {
+    var mc = nextTick._mc || (nextTick._mc = new MessageChannel());
+    mc.port1.onmessage = cb;
+    mc.port2.postMessage(0);
+  }
+
   function encodeWebCodecs(cv, ctx, p, L, FPS, btn) {
     var total = Math.round(p.dur * FPS);
     return new Promise(function (resolve, reject) {
@@ -1105,7 +1252,7 @@
           vf.close();
           if (i % 15 === 0) btn.textContent = '编码中 ' + Math.round(i / total * 100) + '%…';
           i++;
-          setTimeout(step, enc.encodeQueueSize > 4 ? 15 : 0);
+          nextTick(step);
         } catch (e) { reject(e); }
       }
       step();
@@ -1167,10 +1314,67 @@
     });
   });
 
+  /* ---------- fire anchoring ---------- */
+  function showAnchorMark(a) {
+    var scaler = document.getElementById('scaler');
+    var m = document.getElementById('fireMark');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'fireMark';
+      scaler.appendChild(m);
+    }
+    m.style.left = (a.x * 100) + '%';
+    m.style.top = (a.y * 100) + '%';
+    m.classList.remove('pulse');
+    void m.offsetWidth; // restart the animation
+    m.classList.add('pulse');
+  }
+
+  document.getElementById('scaler').addEventListener('click', function (ev) {
+    if ($('fireIn').value !== 'on') return;
+    var r = this.getBoundingClientRect();
+    fireAnchor = {
+      x: Math.min(0.98, Math.max(0.02, (ev.clientX - r.left) / r.width)),
+      y: Math.min(0.98, Math.max(0.02, (ev.clientY - r.top) / r.height)),
+    };
+    showAnchorMark(fireAnchor);
+    saveState();
+  });
+
+  /* the burning bush is usually the brightest thing in the plate —
+     suggest the brightest cell of the background as the anchor */
+  $('fireAutoBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true; btn.textContent = '分析中…';
+    snapLayer('ras-bg').then(function (bg) {
+      var gw = 24, gh = 30;
+      var c = document.createElement('canvas');
+      c.width = gw; c.height = gh;
+      var cx = c.getContext('2d');
+      cx.drawImage(bg, 0, 0, gw, gh);
+      var d = cx.getImageData(0, 0, gw, gh).data;
+      var best = -1, bi = 0;
+      for (var i = 0; i < gw * gh; i++) {
+        var l = 0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2];
+        if (l > best) { best = l; bi = i; }
+      }
+      fireAnchor = { x: ((bi % gw) + 0.5) / gw, y: (Math.floor(bi / gw) + 0.5) / gh };
+      if ($('fireIn').value !== 'on') { $('fireIn').value = 'on'; }
+      showAnchorMark(fireAnchor);
+      saveState();
+    }).catch(function (e) {
+      alert('分析失败：' + e);
+    }).finally(function () {
+      btn.disabled = false; btn.textContent = '自动寻找亮部';
+    });
+  });
+
   /* internal hooks for debugging the motion pipeline */
   window.__thsmMotion = {
     build: buildLayers, draw: drawFrame, params: motionParams,
     encode: encodeWebCodecs, fire: drawFire,
+    setAnchor: function (x, y) { fireAnchor = { x: x, y: y }; },
+    getAnchor: function () { return fireAnchor; },
   };
 
   $('exportBtn').addEventListener('click', function () {
