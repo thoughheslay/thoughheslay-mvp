@@ -912,6 +912,29 @@
     );
   }
 
+  /* type layers get a gentle pop — brighter, more saturated, and denser
+     anti-aliased edges — so text still reads crisp after video compression */
+  function popLayer(cv) {
+    var x = cv.getContext('2d');
+    var img = x.getImageData(0, 0, cv.width, cv.height);
+    var d = img.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var a = d[i + 3];
+      if (!a) continue;
+      var r = d[i], g = d[i + 1], b = d[i + 2];
+      var avg = (r + g + b) / 3;
+      r = (avg + (r - avg) * 1.18) * 1.06;
+      g = (avg + (g - avg) * 1.18) * 1.06;
+      b = (avg + (b - avg) * 1.18) * 1.06;
+      d[i] = r > 255 ? 255 : r;
+      d[i + 1] = g > 255 ? 255 : g;
+      d[i + 2] = b > 255 ? 255 : b;
+      d[i + 3] = 255 * Math.pow(a / 255, 0.75);
+    }
+    x.putImageData(img, 0, 0);
+    return cv;
+  }
+
   /* hide severed words that don't belong in this pass; keepEl stays visible */
   function hideCuts(keepEl) {
     var cuts = Array.prototype.slice.call(document.querySelectorAll('.cut-word'));
@@ -944,10 +967,10 @@
     if (WEBKIT) chain = chain.then(function () { return snapLayer('ras-bg'); }); // warm-up pass
     chain = chain
       .then(function () { return snapLayer('ras-bg'); }).then(function (c) { out.bg = c; })
-      .then(function () { return snapLayer('ras-nobg ras-chrome'); }).then(function (c) { out.chrome = c; })
+      .then(function () { return snapLayer('ras-nobg ras-chrome'); }).then(function (c) { out.chrome = popLayer(c); })
       .then(function () {
         if (!$('attrIn').value.trim()) return null;
-        return snapLayer('ras-nobg ras-attr').then(function (c) { out.attr = c; });
+        return snapLayer('ras-nobg ras-attr').then(function (c) { out.attr = popLayer(c); });
       });
     beatsEls.forEach(function (el, bi) {
       chain = chain.then(function () {
@@ -973,17 +996,17 @@
             beatsEls.forEach(function (e2) { e2.style.webkitTextFillColor = ''; e2.style.textShadow = ''; });
             touched.forEach(function (c) { c.style.visibility = ''; });
           };
-        }).then(function (c) { out.beats[bi] = c; });
+        }).then(function (c) { out.beats[bi] = popLayer(c); });
       });
     });
     if (cutEl) {
       chain = chain
         .then(function () {
           return snapLayer('ras-nobg ras-slice ras-top', function () { return hideCuts(cutEl); });
-        }).then(function (c) { out.top = c; })
+        }).then(function (c) { out.top = popLayer(c); })
         .then(function () {
           return snapLayer('ras-nobg ras-slice ras-bot no-skew', function () { return hideCuts(cutEl); });
-        }).then(function (c) { out.bot = c; });
+        }).then(function (c) { out.bot = popLayer(c); });
     }
     return chain.then(function () {
       out.timeline = buildTimeline(out);
@@ -1237,7 +1260,7 @@
       enc.configure({
         codec: 'avc1.640028',
         width: cv.width, height: cv.height,
-        bitrate: 10000000, framerate: FPS,
+        bitrate: 18000000, framerate: FPS, // text edges smear first under compression
       });
       var i = 0;
       function step() {
@@ -1271,7 +1294,7 @@
       var mime = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm']
         .filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0];
       if (!mime) { reject(new Error('浏览器不支持视频导出')); return; }
-      var rec = new MediaRecorder(cv.captureStream(FPS), { mimeType: mime, videoBitsPerSecond: 10000000 });
+      var rec = new MediaRecorder(cv.captureStream(FPS), { mimeType: mime, videoBitsPerSecond: 16000000 });
       var parts = [];
       rec.ondataavailable = function (e) { if (e.data.size) parts.push(e.data); };
       rec.onstop = function () {
