@@ -117,6 +117,8 @@
   .bg-img img {
     width: 100%; height: 100%; object-fit: cover; object-position: center;
   }
+  /* 完整 mode: the whole plate, edges baked to fade into the card */
+  #stage.img-fit .bg-img img { object-fit: contain; }
   .vignette { position: absolute; inset: 0; }
   #stage.has-img .vignette {
     background:
@@ -479,13 +481,28 @@
     <label><span class="field-name">亮度 · <span id="brightVal">52</span>%</span>
       <input type="range" id="brightIn" min="20" max="100" value="52">
     </label>
-    <label><span class="field-name">对位</span>
-      <select id="posIn">
-        <option value="center top">上</option>
-        <option value="center" selected>中</option>
-        <option value="center bottom">下</option>
+    <label><span class="field-name">图片布局</span>
+      <select id="fitIn">
+        <option value="cover">铺满（超出裁剪）</option>
+        <option value="fit">完整（四边融入底色）</option>
       </select>
     </label>
+    <div class="row">
+      <label><span class="field-name">水平对位</span>
+        <select id="posXIn">
+          <option value="center" selected>中</option>
+          <option value="left">左</option>
+          <option value="right">右</option>
+        </select>
+      </label>
+      <label><span class="field-name">竖直对位</span>
+        <select id="posIn">
+          <option value="center" selected>中</option>
+          <option value="top">上</option>
+          <option value="bottom">下</option>
+        </select>
+      </label>
+    </div>
   </fieldset>
 
   <fieldset>
@@ -637,6 +654,7 @@
     var tone = $('toneIn').value;
     var bright = $('brightIn').value / 100;
     var editorial = $('layoutIn').value === 'editorial';
+    var fitMode = $('fitIn').value === 'fit';
     var paper = $('bgIn').value === 'paper';
     var ACC = { gold: [201, 168, 106], blood: [138, 58, 52], ash: [179, 168, 149] };
     var ACC_DEEP = { gold: [143, 115, 56], blood: [94, 38, 36], ash: [107, 96, 81] };
@@ -647,6 +665,7 @@
     var hi = paper ? [241, 236, 226] : ACC[accName];
     var d = ctx.getImageData(0, 0, w, h), px = d.data;
     var fadeX = w * 0.38, fadeY = h * 0.34;
+    var feX = w * 0.1, feY = h * 0.1;
     for (var i = 0, p = 0; i < px.length; i += 4, p++) {
       var l = (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255 * bright;
       if (l > 1) l = 1;
@@ -661,7 +680,13 @@
         px[i + 1] = mlo[1] + (mhi[1] - mlo[1]) * l;
         px[i + 2] = mlo[2] + (mhi[2] - mlo[2]) * l;
       }
-      if (editorial) { // fade top and left edges into the background
+      if (fitMode) { // 完整 mode: all four edges melt into the card
+        var xf = p % w, yf = (p / w) | 0;
+        var fx = Math.min(1, xf / feX, (w - 1 - xf) / feX);
+        var fy = Math.min(1, yf / feY, (h - 1 - yf) / feY);
+        var f = (fx < 0 ? 0 : fx) * (fy < 0 ? 0 : fy);
+        px[i + 3] = px[i + 3] * f;
+      } else if (editorial) { // fade top and left edges into the background
         var x = p % w, y = (p / w) | 0;
         var ax = x < fadeX ? x / fadeX : 1;
         var ay = y < fadeY ? y / fadeY : 1;
@@ -669,7 +694,7 @@
       }
     }
     ctx.putImageData(d, 0, 0);
-    bgImg.src = editorial ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.92);
+    bgImg.src = (fitMode || editorial) ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.92);
   }
 
   function updateRatioLabels() {
@@ -710,10 +735,11 @@
       ' tone-' + $('toneIn').value +
       ' layout-' + $('layoutIn').value +
       ' bg-' + $('bgIn').value +
+      ' img-' + $('fitIn').value +
       (rawImg ? ' has-img' : '') +
       ($('safeIn').checked ? ' show-safe' : '');
 
-    bgImg.style.objectPosition = $('posIn').value;
+    bgImg.style.objectPosition = $('posXIn').value + ' ' + $('posIn').value;
     $('brightVal').textContent = $('brightIn').value;
 
     var s = SIZES[$('ratioIn').value];
@@ -764,7 +790,7 @@
 
   var CTRLS = ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn',
     'toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','plateIn',
-    'fireIn','fireScaleIn','shimmerIn','durIn','kbIn'];
+    'fireIn','fireScaleIn','shimmerIn','durIn','kbIn','fitIn','posXIn'];
 
   function saveState() {
     var st = { fireAnchor: fireAnchor };
@@ -795,10 +821,10 @@
     $('scaler').style.height = s[1] * scale + 'px';
   }
 
-  ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn','toneIn','brightIn','posIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','fireIn','fireScaleIn','shimmerIn','durIn','kbIn']
+  ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn','toneIn','brightIn','posIn','posXIn','fitIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','fireIn','fireScaleIn','shimmerIn','durIn','kbIn']
     .forEach(function (id) { $(id).addEventListener('input', render); });
   // these change how the image pixels are baked
-  ['toneIn','accentIn','layoutIn','bgIn'].forEach(function (id) { $(id).addEventListener('input', processBg); });
+  ['toneIn','accentIn','layoutIn','bgIn','fitIn'].forEach(function (id) { $(id).addEventListener('input', processBg); });
   $('brightIn').addEventListener('change', processBg); // reprocess on release, not on every tick
   $('scaleIn').addEventListener('input', updateRatioLabels);
   window.addEventListener('resize', fit);
