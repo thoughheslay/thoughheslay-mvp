@@ -232,6 +232,10 @@
   #stage.ras-bg .content { visibility: hidden; }
   #stage.ras-nobg .bg-base, #stage.ras-nobg .bg-img,
   #stage.ras-nobg .vignette, #stage.ras-nobg .grain { visibility: hidden; }
+  /* transparent glyphs must not cast shadows — Chromium paints the shadow
+     of transparent-filled text, which bakes dark ghosts into other layers */
+  #stage.ras-chrome .c-quote, #stage.ras-attr .c-quote, #stage.ras-slice .c-quote { text-shadow: none; }
+  #stage.ras-top.has-img .cw-t, #stage.ras-bot.has-img .cw-b { text-shadow: 0 2px 28px rgba(0,0,0,0.5); }
   /* chrome = eyebrow / series / brand block, shown with the first beat */
   #stage.ras-chrome .c-quote { -webkit-text-fill-color: transparent; }
   #stage.ras-chrome .cut-word, #stage.ras-chrome .c-rule, #stage.ras-chrome .c-attr { visibility: hidden; }
@@ -953,9 +957,11 @@
         if (pc) pc.parentNode.removeChild(pc);
         if (!probe.textContent.replace(/\s+/g, '')) { out.beats[bi] = null; return null; }
         return snapLayer('ras-nobg ras-beats', function () {
-          // only this beat's glyphs keep their fill
+          // only this beat's glyphs keep their fill — and their shadow;
+          // Chromium paints shadows of transparent text
           beatsEls.forEach(function (e2, j) {
             e2.style.webkitTextFillColor = j === bi ? '' : 'transparent';
+            e2.style.textShadow = j === bi ? '' : 'none';
           });
           // the animated word renders via its slice layers; severed words in
           // other beats must not leak their seam bars into this layer
@@ -964,7 +970,7 @@
             if (c === cutEl || !el.contains(c)) { c.style.visibility = 'hidden'; touched.push(c); }
           });
           return function () {
-            beatsEls.forEach(function (e2) { e2.style.webkitTextFillColor = ''; });
+            beatsEls.forEach(function (e2) { e2.style.webkitTextFillColor = ''; e2.style.textShadow = ''; });
             touched.forEach(function (c) { c.style.visibility = ''; });
           };
         }).then(function (c) { out.beats[bi] = c; });
