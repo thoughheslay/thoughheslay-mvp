@@ -484,6 +484,7 @@
     <label><span class="field-name">图片布局</span>
       <select id="fitIn">
         <option value="cover">铺满（超出裁剪）</option>
+        <option value="mid">适度（最多裁 15%）</option>
         <option value="fit">完整（四边融入底色）</option>
       </select>
     </label>
@@ -655,6 +656,7 @@
     var bright = $('brightIn').value / 100;
     var editorial = $('layoutIn').value === 'editorial';
     var fitMode = $('fitIn').value === 'fit';
+    var midMode = $('fitIn').value === 'mid';
     var paper = $('bgIn').value === 'paper';
     var ACC = { gold: [201, 168, 106], blood: [138, 58, 52], ash: [179, 168, 149] };
     var ACC_DEEP = { gold: [143, 115, 56], blood: [94, 38, 36], ash: [107, 96, 81] };
@@ -686,7 +688,7 @@
         var fy = Math.min(1, yf / feY, (h - 1 - yf) / feY);
         var f = (fx < 0 ? 0 : fx) * (fy < 0 ? 0 : fy);
         px[i + 3] = px[i + 3] * f;
-      } else if (editorial) { // fade top and left edges into the background
+      } else if (editorial && !midMode) { // fade top and left edges into the background
         var x = p % w, y = (p / w) | 0;
         var ax = x < fadeX ? x / fadeX : 1;
         var ay = y < fadeY ? y / fadeY : 1;
@@ -694,6 +696,39 @@
       }
     }
     ctx.putImageData(d, 0, 0);
+    if (midMode) {
+      // 适度: compose at the frame's ratio with crop capped at 15% per axis;
+      // image edges that sit inside the frame fade into the card
+      var box = bgImg.parentNode;
+      var BW = Math.round(box.offsetWidth) || SIZES[$('ratioIn').value][0];
+      var BH = Math.round(box.offsetHeight) || SIZES[$('ratioIn').value][1];
+      var sCover = Math.max(BW / w, BH / h);
+      var sCap = Math.min(BW / (w * 0.85), BH / (h * 0.85));
+      var sc = Math.min(sCover, sCap);
+      var dw = w * sc, dh = h * sc;
+      var posX = $('posXIn').value, posY = $('posIn').value;
+      var dx = posX === 'left' ? 0 : posX === 'right' ? BW - dw : (BW - dw) / 2;
+      var dy = posY === 'top' ? 0 : posY === 'bottom' ? BH - dh : (BH - dh) / 2;
+      var c2 = document.createElement('canvas');
+      c2.width = BW; c2.height = BH;
+      var g = c2.getContext('2d');
+      g.drawImage(c, dx, dy, dw, dh);
+      g.globalCompositeOperation = 'destination-out';
+      var fl = Math.min(dw, dh) * 0.09;
+      function fade(x0, y0, ww, hh, gx0, gy0, gx1, gy1) {
+        var gr = g.createLinearGradient(gx0, gy0, gx1, gy1);
+        gr.addColorStop(0, 'rgba(0,0,0,1)');
+        gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = gr;
+        g.fillRect(x0, y0, ww, hh);
+      }
+      if (dy > -1) fade(dx, dy, dw, fl, 0, dy, 0, dy + fl);
+      if (dy + dh < BH + 1) fade(dx, dy + dh - fl, dw, fl, 0, dy + dh, 0, dy + dh - fl);
+      if (dx > -1) fade(dx, dy, fl, dh, dx, 0, dx + fl, 0);
+      if (dx + dw < BW + 1) fade(dx + dw - fl, dy, fl, dh, dx + dw, 0, dx + dw - fl, 0);
+      bgImg.src = c2.toDataURL('image/png');
+      return;
+    }
     bgImg.src = (fitMode || editorial) ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.92);
   }
 
@@ -823,8 +858,9 @@
 
   ['quoteIn','attrIn','eyebrowIn','tagIn','styleIn','accentIn','fontIn','ratioIn','scaleIn','toneIn','brightIn','posIn','posXIn','fitIn','safeIn','layoutIn','markIn','bgIn','seriesIn','handleIn','fireIn','fireScaleIn','shimmerIn','durIn','kbIn']
     .forEach(function (id) { $(id).addEventListener('input', render); });
-  // these change how the image pixels are baked
-  ['toneIn','accentIn','layoutIn','bgIn','fitIn'].forEach(function (id) { $(id).addEventListener('input', processBg); });
+  // these change how the image pixels are baked (ratio/position matter to 适度 mode's
+  // frame-ratio bake; render runs first, so the box is already resized when we read it)
+  ['toneIn','accentIn','layoutIn','bgIn','fitIn','ratioIn','posIn','posXIn'].forEach(function (id) { $(id).addEventListener('input', processBg); });
   $('brightIn').addEventListener('change', processBg); // reprocess on release, not on every tick
   $('scaleIn').addEventListener('input', updateRatioLabels);
   window.addEventListener('resize', fit);
