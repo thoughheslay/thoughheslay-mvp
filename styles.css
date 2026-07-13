@@ -156,10 +156,20 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--display); font-weight: 700;
   font-size: clamp(1.5rem, 3.6vw, 2.4rem); line-height: 1.3;
   color: var(--ink); letter-spacing: -0.01em;
-  margin: 2.6rem 0;
+  margin: 2.6rem 0 0.9rem;
 }
 .word-exchange .word-key { color: var(--gold-deep); }
-.zone-paper .stance-close { color: var(--gold-deep); }
+/* the reminder — a quiet gloss hugging the exchange above */
+.word-gloss {
+  margin-top: 0; max-width: 42ch;
+  font-size: clamp(1rem, 1.9vw, 1.18rem); color: var(--ink-soft);
+}
+/* the verse the brand is named for — its closing proclamation */
+.word-verse {
+  font-family: var(--quote); font-style: italic;
+  font-size: clamp(1.5rem, 3.6vw, 2.3rem); line-height: 1.3;
+  color: var(--gold-deep); margin-top: 2.8rem;
+}
 
 /* ============================================================
    TRANSITION  (light -> dark bridge)
