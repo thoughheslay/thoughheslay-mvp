@@ -139,8 +139,8 @@ a { color: inherit; text-decoration: none; }
    ============================================================ */
 .word-lede {
   font-family: var(--display); font-weight: 700;
-  font-size: clamp(1.9rem, 5vw, 3.2rem); line-height: 1.18; color: var(--ink);
-  margin-bottom: 2rem; letter-spacing: -0.01em;
+  font-size: clamp(1.8rem, 4.4vw, 2.7rem); line-height: 1.18; color: var(--ink);
+  margin-bottom: 2.6rem; letter-spacing: -0.01em;
 }
 .word-lede .word-key { color: var(--gold-deep); }
 .word-body {
@@ -151,41 +151,49 @@ a { color: inherit; text-decoration: none; }
 .word-body em { font-style: italic; color: var(--blood-deep); }
 .word-accent { color: var(--gold-deep); font-style: italic; }
 
-/* the great exchange — the section's center of gravity */
-/* the argument builds down the left column, then turns to a centered creed */
-.word-hinge {
-  width: 1px; height: clamp(40px, 7vh, 64px);
-  background: linear-gradient(var(--gold-deep), transparent);
-  margin: clamp(2.2rem, 5vh, 3.2rem) auto clamp(2rem, 4.5vh, 2.8rem);
+/* THE WORD — a calm left column. The world's command recedes to fine print,
+   the gospel exchange rises as the one peak, and each stanza is given air so
+   it arrives on its own as the reader scrolls. */
+.word-zone .wrap { max-width: 640px; }
+/* the world's command, diminished to fine print */
+.word-world {
+  font-family: var(--body); font-size: clamp(0.95rem, 1.7vw, 1.08rem);
+  line-height: 1.7; color: var(--studio-ink); max-width: 32ch;
+  letter-spacing: 0.02em; margin-top: 2.6rem;
 }
-.word-turn { text-align: center; }
-.word-turn > p { margin-left: auto; margin-right: auto; }
-.word-run {
-  font-family: var(--body); font-size: clamp(1.15rem, 2.2vw, 1.4rem);
-  line-height: 1.6; color: var(--ink); max-width: 34ch;
+.word-world em { font-style: normal; color: var(--ink-soft); }
+/* the turn — first full-ink line after the world, a held breath before it */
+.word-turn-line {
+  font-family: var(--body); font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  line-height: 1.6; color: var(--ink); max-width: 30ch;
+  margin-top: 3.6rem; text-wrap: balance;
 }
+/* the one peak — the gospel exchange */
 .word-exchange {
-  font-family: var(--display); font-weight: 700;
-  font-size: clamp(1.5rem, 3.6vw, 2.4rem); line-height: 1.3;
-  color: var(--ink); letter-spacing: -0.01em;
-  margin: 2.4rem auto 0.9rem;
+  font-family: var(--display); font-weight: 900;
+  font-size: clamp(2rem, 4.8vw, 3.05rem); line-height: 1.16;
+  color: var(--ink); letter-spacing: -0.015em;
+  margin: 3.2rem 0 0.9rem;
 }
+/* each exchange balances on its own so neither orphans its final word */
+.word-exchange .ex-line { display: block; text-wrap: balance; }
+.word-exchange .ex-line + .ex-line { margin-top: 0.35rem; }
 .word-exchange .word-key { color: var(--gold-deep); }
-/* the reminder — a quiet gloss hugging the exchange above */
+/* the reminder — a caption to the exchange */
 .word-gloss {
-  margin: 0 auto; max-width: 42ch;
-  font-family: var(--body); line-height: 1.6;
-  font-size: clamp(1rem, 1.9vw, 1.18rem); color: var(--ink-soft);
+  max-width: 40ch; font-family: var(--body); line-height: 1.62;
+  font-size: clamp(1rem, 1.8vw, 1.12rem); color: var(--ink-soft);
+  text-wrap: balance;
 }
 .word-heavy {
   font-family: var(--body); font-size: clamp(1.1rem, 2vw, 1.3rem);
-  line-height: 1.6; color: var(--ink); max-width: 34ch; margin-top: 1.7rem;
+  line-height: 1.66; color: var(--ink); max-width: 34ch; margin-top: 2.8rem;
 }
-/* the verse the brand is named for — its closing proclamation */
+/* the benediction — stands alone */
 .word-verse {
   font-family: var(--quote); font-style: italic;
-  font-size: clamp(1.5rem, 3.6vw, 2.3rem); line-height: 1.3;
-  color: var(--gold-deep); margin-top: 2.6rem;
+  font-size: clamp(1.55rem, 3.6vw, 2.35rem); line-height: 1.32;
+  color: var(--gold-deep); margin-top: 4rem;
 }
 
 /* ============================================================
